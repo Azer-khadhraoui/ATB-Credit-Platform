@@ -1,0 +1,42 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-card__form">
+      <img class="form-header__icon" src="/images/logoatbicon.webp" alt="ATB" />
+
+      <div class="form-header">
+        <h1>Welcome back</h1>
+        <p class="subtitle">Sign in to continue to your account</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <label for="email">Email</label>
+        <div class="input-group">
+          <i class="fa-regular fa-envelope"></i>
+          <input id="email" type="email" formControlName="email" placeholder="Enter your email address" />
+        </div>
+
+        <label for="password">Password</label>
+        <div class="input-group">
+          <i class="fa-solid fa-lock"></i>
+          <input id="password" type="password" formControlName="password" placeholder="Enter your password" />
+        </div>
+
+        <a class="forgot-link" href="#">Forgot your password?</a>
+
+        <button type="submit" class="sign-in-btn">Sign In</button>
+      </form>
+
+      <p class="create-account">
+        Don't have an account? <a href="#">Create account</a>
+      </p>
+    </div>
+
+    <div class="login-card__visual">
+      <img class="visual-photo" src="/images/imagesignin.png" alt="ATB - Un nouvel élan pour l'écoute" />
+
+      <div class="visual-logo-badge">
+        <img src="/images/logoatbbackgblanc.jpg" alt="ATB" />
+      </div>
+    </div>
+  </div>
+</div>
