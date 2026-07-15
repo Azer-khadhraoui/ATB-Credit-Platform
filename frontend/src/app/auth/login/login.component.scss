@@ -46,10 +46,10 @@
 }
 
 .login-card__form {
-  padding: 48px 48px 56px;
+  padding: 32px 48px 56px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 
   .form-header__icon {
     display: block;
@@ -82,7 +82,7 @@
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: var(--ink);
+    color: #565660;
     margin-bottom: 6px;
   }
 
@@ -90,12 +90,13 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #f2f2f5;
-    border: 1px solid transparent;
+    background: #fff;
+    border: 1px solid #dcdce2;
     border-radius: 10px;
     padding: 12px 14px;
     margin-bottom: 20px;
-    transition: border-color 0.15s ease;
+    box-shadow: 0 1px 2px rgba(20, 20, 30, 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
     i {
       color: var(--muted);
@@ -118,7 +119,7 @@
 
     &:focus-within {
       border-color: var(--atb-red);
-      background: #fff;
+      box-shadow: 0 0 0 3px rgba(200, 19, 79, 0.12);
     }
   }
 
