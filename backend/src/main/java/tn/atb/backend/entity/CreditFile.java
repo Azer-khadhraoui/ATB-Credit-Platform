@@ -63,6 +63,8 @@ public class CreditFile {
 
     private String comments;
 
+    private MLPredictionResult mlPredictionResult;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
