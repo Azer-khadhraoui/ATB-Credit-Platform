@@ -1,0 +1,117 @@
+<div class="shell">
+  <header class="topbar">
+    <div class="topbar__left">
+      <div class="brand">
+        <img src="/images/logoatbicon.webp" alt="ATB" class="brand__logo" />
+        <span class="brand__name">ATB</span>
+      </div>
+    </div>
+
+    <div class="topbar__right">
+      <button type="button" class="icon-btn" aria-label="Notifications">
+        <i class="fa-regular fa-bell"></i>
+        <span class="badge">3</span>
+      </button>
+
+      <button type="button" class="profile">
+        <span class="profile__avatar"><i class="fa-solid fa-user"></i></span>
+        <span class="profile__info">
+          <span class="profile__name">Admin ATB</span>
+          <span class="profile__role">ADMIN</span>
+        </span>
+        <i class="fa-solid fa-chevron-down profile__chevron"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="body">
+    <aside
+      class="sidebar"
+      [class.sidebar--collapsed]="!sidebarOpen()"
+      (mouseenter)="onSidebarEnter()"
+      (mouseleave)="onSidebarLeave()"
+    >
+      <nav class="nav">
+        <div class="nav-group">
+          <span class="nav-group__label">Vue d'ensemble</span>
+
+          <a routerLink="/app/dashboard" routerLinkActive="nav-link--active" class="nav-link" title="Tableau de bord">
+            <span class="nav-link__icon"><i class="fa-solid fa-gauge-high"></i></span>
+            <span class="nav-link__label">Tableau de bord</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <span class="nav-group__label">Gestion</span>
+
+          <a routerLink="/app/users" routerLinkActive="nav-link--active" class="nav-link" title="Utilisateurs">
+            <span class="nav-link__icon"><i class="fa-solid fa-users"></i></span>
+            <span class="nav-link__label">Utilisateurs</span>
+          </a>
+
+          <a routerLink="/app/clients" routerLinkActive="nav-link--active" class="nav-link" title="Clients">
+            <span class="nav-link__icon"><i class="fa-solid fa-id-card"></i></span>
+            <span class="nav-link__label">Clients</span>
+          </a>
+
+          <div class="nav-parent">
+            <a
+              routerLink="/app/credit-files"
+              (click)="toggleCreditFiles()"
+              routerLinkActive="nav-link--active"
+              class="nav-link"
+              title="Dossiers de crédit"
+            >
+              <span class="nav-link__icon"><i class="fa-solid fa-folder-open"></i></span>
+              <span class="nav-link__label">Dossiers de crédit</span>
+              <i class="fa-solid fa-chevron-down nav-link__caret" [class.nav-link__caret--open]="creditFilesExpanded()"></i>
+            </a>
+
+            <div class="nav-submenu" [class.nav-submenu--open]="creditFilesExpanded() && sidebarOpen()">
+              <a
+                routerLink="/app/credit-files"
+                routerLinkActive="nav-link--active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="nav-link nav-link--sub"
+              >
+                <span class="nav-link__dot"></span>
+                <span class="nav-link__label">Liste des dossiers</span>
+              </a>
+              <a routerLink="/app/credit-files/new" routerLinkActive="nav-link--active" class="nav-link nav-link--sub">
+                <span class="nav-link__dot"></span>
+                <span class="nav-link__label">Ajouter un dossier</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <span class="nav-group__label">Système</span>
+
+          <a routerLink="/app/audit" routerLinkActive="nav-link--active" class="nav-link" title="Audit Logs">
+            <span class="nav-link__icon"><i class="fa-solid fa-clipboard-list"></i></span>
+            <span class="nav-link__label">Audit Logs</span>
+          </a>
+
+          <a routerLink="/app/settings" routerLinkActive="nav-link--active" class="nav-link" title="Paramètres">
+            <span class="nav-link__icon"><i class="fa-solid fa-gear"></i></span>
+            <span class="nav-link__label">Paramètres</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <span class="sidebar__footer-logo">ATB</span>
+        <span class="sidebar__footer-tagline">ENSEMBLE, POUR LA RÉUSSITE</span>
+      </div>
+    </aside>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <aside class="visual">
+      <img src="/images/imagecrud1.png" alt="ATB - Un nouvel élan pour la réussite" />
+    </aside>
+  </div>
+</div>
