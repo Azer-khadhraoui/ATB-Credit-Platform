@@ -1,0 +1,429 @@
+:host {
+  --atb-red: #c8134f;
+  --atb-red-dark: #9c0f3e;
+  --atb-red-glow: rgba(200, 19, 79, 0.45);
+  --sidebar-bg-top: #5a1230;
+  --sidebar-bg-bottom: #35091b;
+  --ink: #2b2b33;
+  --muted: #7a7a85;
+  --page-bg: #f2ebee;
+  --panel-shadow: 0 10px 28px rgba(90, 18, 48, 0.1);
+  --panel-radius: 22px;
+  --gap: 14px;
+  display: block;
+  height: 100vh;
+}
+
+.shell {
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: var(--gap);
+  background: var(--page-bg);
+  overflow: hidden;
+}
+
+.topbar {
+  flex: 0 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  background: #fff;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  z-index: 2;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+
+  &__name {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--atb-red-dark);
+    letter-spacing: 0.02em;
+  }
+}
+
+.icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  background: #f6f1f2;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #efe6e8;
+  }
+
+  .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--atb-red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f6f1f2;
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--atb-red);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  &__role {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  &__chevron {
+    font-size: 10px;
+    color: var(--muted);
+  }
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  gap: var(--gap);
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ---------------------------------------------------------------------------
+// Sidebar — a floating rounded panel, quiet as an icon rail at rest, opening
+// on hover intent to reveal labels. Width is the only thing that moves;
+// labels shrink their own max-width in step so nothing slides across.
+// ---------------------------------------------------------------------------
+
+.sidebar {
+  --sidebar-width: 264px;
+  --sidebar-width-collapsed: 76px;
+
+  flex: 0 0 var(--sidebar-width-collapsed);
+  width: var(--sidebar-width-collapsed);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(165deg, var(--sidebar-bg-top), var(--sidebar-bg-bottom));
+  color: #fff;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  overflow: hidden;
+  transition: flex-basis 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+
+  &:not(&--collapsed) {
+    flex-basis: var(--sidebar-width);
+    width: var(--sidebar-width);
+  }
+
+  &--collapsed {
+    .nav-group__label,
+    .nav-link__label,
+    .nav-link__caret,
+    .sidebar__footer-tagline {
+      opacity: 0;
+      max-width: 0;
+    }
+
+    .nav-link {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .nav-link--sub,
+    .nav-submenu {
+      display: none;
+    }
+
+    .sidebar__footer {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 20px 14px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  &__label {
+    display: block;
+    padding: 0 12px;
+    margin-bottom: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38);
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.15s ease, max-width 0.2s ease;
+  }
+}
+
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 13px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.15s ease, color 0.15s ease, padding 0.2s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    border-radius: 0 3px 3px 0;
+    background: #fff;
+    transition: height 0.18s ease;
+  }
+
+  &__icon {
+    flex: 0 0 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  &__label {
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 160px;
+    transition: opacity 0.15s ease, max-width 0.2s ease;
+  }
+
+  &__dot {
+    flex: 0 0 5px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+  }
+
+  &--active {
+    background: var(--atb-red);
+    color: #fff;
+    box-shadow: 0 6px 16px var(--atb-red-glow);
+
+    &::before {
+      height: 18px;
+    }
+  }
+
+  &--sub {
+    padding-left: 33px;
+    font-size: 12.5px;
+  }
+
+  &__caret {
+    margin-left: auto;
+    font-size: 11px;
+    flex: 0 0 auto;
+    transition: transform 0.15s ease, opacity 0.15s ease, max-width 0.2s ease;
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.nav-submenu {
+  max-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+  transition: max-height 0.2s ease;
+
+  .nav-link {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  &--open {
+    max-height: 120px;
+
+    .nav-link {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.sidebar__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  transition: padding 0.2s ease;
+}
+
+.sidebar__footer-logo {
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+}
+
+.sidebar__footer-tagline {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.15s ease, max-width 0.2s ease;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #faf8f8;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+}
+
+.visual {
+  flex: 0 0 320px;
+  width: 320px;
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+@media (max-width: 1200px) {
+  .visual {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed;
+    top: 74px;
+    bottom: 14px;
+    left: 14px;
+    z-index: 3;
+  }
+}
