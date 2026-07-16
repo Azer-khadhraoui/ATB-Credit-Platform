@@ -4,30 +4,30 @@
       <img class="form-header__icon" src="/images/logoatbicon.webp" alt="ATB" />
 
       <div class="form-header">
-        <h1>Welcome back</h1>
-        <p class="subtitle">Sign in to continue to your account</p>
+        <h1>Bon retour</h1>
+        <p class="subtitle">Connectez-vous pour accéder à votre compte</p>
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <label for="matricule">Matricule</label>
         <div class="input-group">
           <i class="fa-regular fa-id-badge"></i>
-          <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Enter your matricule" />
+          <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Entrez votre matricule" />
         </div>
 
-        <label for="password">Password</label>
+        <label for="password">Mot de passe</label>
         <div class="input-group">
           <i class="fa-solid fa-lock"></i>
-          <input id="password" type="password" formControlName="password" placeholder="Enter your password" />
+          <input id="password" type="password" formControlName="password" placeholder="Entrez votre mot de passe" />
         </div>
 
-        <a class="forgot-link" href="#">Forgot your password?</a>
+        <a class="forgot-link" href="#">Mot de passe oublié ?</a>
 
-        <button type="submit" class="sign-in-btn">Sign In</button>
+        <button type="submit" class="sign-in-btn">Se connecter</button>
       </form>
 
       <p class="create-account">
-        Don't have an account? <a routerLink="/signup">Create account</a>
+        Vous n'avez pas de compte ? <a routerLink="/signup">Créer un compte</a>
       </p>
     </div>
 
