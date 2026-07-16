@@ -4,25 +4,25 @@
       <img class="form-header__icon" src="/images/logoatbicon.webp" alt="ATB" />
 
       <div class="form-header">
-        <h1>Create account</h1>
-        <p class="subtitle">Join us and manage your credit files with confidence</p>
+        <h1>Créer un compte</h1>
+        <p class="subtitle">Rejoignez-nous et gérez vos dossiers de crédit en toute confiance</p>
       </div>
 
       <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
         <div class="field-row">
           <div class="field-col">
-            <label for="firstName">First name</label>
+            <label for="firstName">Prénom</label>
             <div class="input-group">
               <i class="fa-regular fa-user"></i>
-              <input id="firstName" type="text" formControlName="firstName" placeholder="Enter your first name" />
+              <input id="firstName" type="text" formControlName="firstName" placeholder="Entrez votre prénom" />
             </div>
           </div>
 
           <div class="field-col">
-            <label for="lastName">Last name</label>
+            <label for="lastName">Nom</label>
             <div class="input-group">
               <i class="fa-regular fa-user"></i>
-              <input id="lastName" type="text" formControlName="lastName" placeholder="Enter your last name" />
+              <input id="lastName" type="text" formControlName="lastName" placeholder="Entrez votre nom" />
             </div>
           </div>
         </div>
@@ -30,38 +30,38 @@
         <label for="matricule">Matricule</label>
         <div class="input-group">
           <i class="fa-regular fa-id-badge"></i>
-          <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Enter your matricule" />
+          <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Entrez votre matricule" />
         </div>
 
         <label for="email">Email</label>
         <div class="input-group">
           <i class="fa-regular fa-envelope"></i>
-          <input id="email" type="email" formControlName="email" placeholder="Enter your email address" />
+          <input id="email" type="email" formControlName="email" placeholder="Entrez votre adresse email" />
         </div>
 
         <div class="field-row">
           <div class="field-col">
-            <label for="password">Password</label>
+            <label for="password">Mot de passe</label>
             <div class="input-group">
               <i class="fa-solid fa-lock"></i>
-              <input id="password" type="password" formControlName="password" placeholder="Create a password" />
+              <input id="password" type="password" formControlName="password" placeholder="Créez un mot de passe" />
             </div>
           </div>
 
           <div class="field-col">
-            <label for="confirmPassword">Confirm password</label>
+            <label for="confirmPassword">Confirmer le mot de passe</label>
             <div class="input-group">
               <i class="fa-solid fa-lock"></i>
-              <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Confirm your password" />
+              <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Confirmez votre mot de passe" />
             </div>
           </div>
         </div>
 
-        <button type="submit" class="sign-in-btn">Create account</button>
+        <button type="submit" class="sign-in-btn">Créer un compte</button>
       </form>
 
       <p class="create-account">
-        Already have an account? <a routerLink="/login">Sign in</a>
+        Vous avez déjà un compte ? <a routerLink="/login">Se connecter</a>
       </p>
     </div>
 
