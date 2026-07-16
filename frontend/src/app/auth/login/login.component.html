@@ -9,10 +9,10 @@
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <label for="email">Email</label>
+        <label for="matricule">Matricule</label>
         <div class="input-group">
-          <i class="fa-regular fa-envelope"></i>
-          <input id="email" type="email" formControlName="email" placeholder="Enter your email address" />
+          <i class="fa-regular fa-id-badge"></i>
+          <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Enter your matricule" />
         </div>
 
         <label for="password">Password</label>
@@ -27,7 +27,7 @@
       </form>
 
       <p class="create-account">
-        Don't have an account? <a href="#">Create account</a>
+        Don't have an account? <a routerLink="/signup">Create account</a>
       </p>
     </div>
 

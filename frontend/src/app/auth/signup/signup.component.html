@@ -1,0 +1,76 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-card__form">
+      <img class="form-header__icon" src="/images/logoatbicon.webp" alt="ATB" />
+
+      <div class="form-header">
+        <h1>Create account</h1>
+        <p class="subtitle">Join us and manage your credit files with confidence</p>
+      </div>
+
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+        <div class="field-row">
+          <div class="field-col">
+            <label for="firstName">First name</label>
+            <div class="input-group">
+              <i class="fa-regular fa-user"></i>
+              <input id="firstName" type="text" formControlName="firstName" placeholder="Enter your first name" />
+            </div>
+          </div>
+
+          <div class="field-col">
+            <label for="lastName">Last name</label>
+            <div class="input-group">
+              <i class="fa-regular fa-user"></i>
+              <input id="lastName" type="text" formControlName="lastName" placeholder="Enter your last name" />
+            </div>
+          </div>
+        </div>
+
+        <label for="matricule">Matricule</label>
+        <div class="input-group">
+          <i class="fa-regular fa-id-badge"></i>
+          <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Enter your matricule" />
+        </div>
+
+        <label for="email">Email</label>
+        <div class="input-group">
+          <i class="fa-regular fa-envelope"></i>
+          <input id="email" type="email" formControlName="email" placeholder="Enter your email address" />
+        </div>
+
+        <div class="field-row">
+          <div class="field-col">
+            <label for="password">Password</label>
+            <div class="input-group">
+              <i class="fa-solid fa-lock"></i>
+              <input id="password" type="password" formControlName="password" placeholder="Create a password" />
+            </div>
+          </div>
+
+          <div class="field-col">
+            <label for="confirmPassword">Confirm password</label>
+            <div class="input-group">
+              <i class="fa-solid fa-lock"></i>
+              <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Confirm your password" />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="sign-in-btn">Create account</button>
+      </form>
+
+      <p class="create-account">
+        Already have an account? <a routerLink="/login">Sign in</a>
+      </p>
+    </div>
+
+    <div class="login-card__visual">
+      <img class="visual-photo" src="/images/signupmen.png" alt="ATB - Un nouvel élan pour vous satisfaire" />
+
+      <div class="visual-logo-badge">
+        <img src="/images/logoatbbackgblanc.jpg.png" alt="ATB" />
+      </div>
+    </div>
+  </div>
+</div>

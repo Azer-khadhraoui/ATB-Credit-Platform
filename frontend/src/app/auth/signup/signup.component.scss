@@ -1,0 +1,224 @@
+:host {
+  --atb-red: #c8134f;
+  --atb-red-dark: #9c0f3e;
+  --ink: #2b2b33;
+  --muted: #7a7a85;
+}
+
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #1a1c2e;
+
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url('/images/backgsignup.png');
+    background-size: cover;
+    background-position: center;
+    filter: blur(14px) brightness(0.65);
+    transform: scale(1.1);
+    z-index: 0;
+  }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1560px;
+  min-height: 70px;
+  display: grid;
+  grid-template-columns: minmax(360px, 38%) 1fr;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+}
+
+.login-card__form {
+  padding: 32px 48px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  .form-header__icon {
+    display: block;
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    margin: 0 auto 8px;
+  }
+
+  .form-header {
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--atb-red-dark);
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .field-row {
+    display: flex;
+    gap: 16px;
+
+    .field-col {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #565660;
+    margin-bottom: 6px;
+  }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #dcdce2;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 2px rgba(20, 20, 30, 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    i {
+      color: var(--muted);
+      font-size: 14px;
+      width: 16px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      color: var(--ink);
+
+      &::placeholder {
+        color: #a8a8b3;
+      }
+    }
+
+    &:focus-within {
+      border-color: var(--atb-red);
+      box-shadow: 0 0 0 3px rgba(200, 19, 79, 0.12);
+    }
+  }
+
+  .sign-in-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--atb-red), var(--atb-red-dark));
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(200, 19, 79, 0.3);
+    transition: transform 0.12s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .create-account {
+    margin: 24px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+
+    a {
+      color: var(--atb-red);
+      font-weight: 700;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.login-card__visual {
+  position: relative;
+  overflow: hidden;
+
+  .visual-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .visual-logo-badge {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 190px;
+    height: 130px;
+    background: #fff;
+    border-top-left-radius: 100% 90%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 14px 22px 20px 0;
+    box-shadow: -6px -6px 18px rgba(0, 0, 0, 0.12);
+
+    img {
+      width: 110px;
+      height: auto;
+      object-fit: contain;
+    }
+  }
+}
+
+@media (max-width: 860px) {
+  .login-card {
+    grid-template-columns: 1fr;
+  }
+
+  .login-card__visual {
+    min-height: 260px;
+  }
+
+  .login-card__form .field-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
