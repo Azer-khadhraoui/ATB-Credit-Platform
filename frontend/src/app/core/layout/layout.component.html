@@ -48,10 +48,35 @@
             <span class="nav-link__label">Utilisateurs</span>
           </a>
 
-          <a routerLink="/app/clients" routerLinkActive="nav-link--active" class="nav-link" title="Clients">
-            <span class="nav-link__icon"><i class="fa-solid fa-id-card"></i></span>
-            <span class="nav-link__label">Clients</span>
-          </a>
+          <div class="nav-parent">
+            <a
+              routerLink="/app/clients"
+              (click)="toggleClients()"
+              routerLinkActive="nav-link--active"
+              class="nav-link"
+              title="Clients"
+            >
+              <span class="nav-link__icon"><i class="fa-solid fa-id-card"></i></span>
+              <span class="nav-link__label">Clients</span>
+              <i class="fa-solid fa-chevron-down nav-link__caret" [class.nav-link__caret--open]="clientsExpanded()"></i>
+            </a>
+
+            <div class="nav-submenu" [class.nav-submenu--open]="clientsExpanded() && sidebarOpen()">
+              <a
+                routerLink="/app/clients"
+                routerLinkActive="nav-link--active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="nav-link nav-link--sub"
+              >
+                <span class="nav-link__dot"></span>
+                <span class="nav-link__label">Liste des clients</span>
+              </a>
+              <a routerLink="/app/clients/new" routerLinkActive="nav-link--active" class="nav-link nav-link--sub">
+                <span class="nav-link__dot"></span>
+                <span class="nav-link__label">Ajouter un client</span>
+              </a>
+            </div>
+          </div>
 
           <div class="nav-parent">
             <a
@@ -110,7 +135,7 @@
     </main>
 
     <aside class="visual">
-      <img src="/images/imagecrud1.png" alt="ATB - Un nouvel élan pour la réussite" />
+      <img [src]="visualImage()" alt="ATB - Un nouvel élan" />
     </aside>
   </div>
 </div>

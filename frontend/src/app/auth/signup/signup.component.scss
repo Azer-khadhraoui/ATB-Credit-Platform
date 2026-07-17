@@ -37,7 +37,7 @@
   max-width: 1560px;
   min-height: 70px;
   display: grid;
-  grid-template-columns: minmax(360px, 38%) 1fr;
+  grid-template-columns: minmax(320px, 34%) minmax(340px, 1fr);
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
