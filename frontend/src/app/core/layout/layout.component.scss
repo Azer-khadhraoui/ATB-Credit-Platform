@@ -401,8 +401,8 @@
 }
 
 .visual {
-  flex: 0 0 460px;
-  width: 460px;
+  flex: 0 0 540px;
+  width: 540px;
   border-radius: var(--panel-radius);
   box-shadow: var(--panel-shadow);
   overflow: hidden;
@@ -411,13 +411,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     display: block;
-  }
-}
-
-@media (max-width: 1200px) {
-  .visual {
-    display: none;
   }
 }
 
