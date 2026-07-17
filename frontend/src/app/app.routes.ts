@@ -24,9 +24,9 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'users', component: UsersComponent },
-      { path: 'users/:id/edit', component: UserFormComponent },
-      { path: 'clients', component: ClientsComponent },
+      { path: 'users', component: UsersComponent, data: { visualImage: '/images/utilisateurpageimage.png' } },
+      { path: 'users/:id/edit', component: UserFormComponent, data: { visualImage: '/images/utilisateurpageimage.png' } },
+      { path: 'clients', component: ClientsComponent, data: { visualImage: '/images/crudclientimage.png' } },
       { path: 'clients/new', component: ClientFormComponent, data: { visualImage: '/images/crudclientimage.png' } },
       { path: 'clients/:id/edit', component: ClientFormComponent, data: { visualImage: '/images/crudclientimage.png' } },
       { path: 'credit-files', component: CreditFileListComponent },
