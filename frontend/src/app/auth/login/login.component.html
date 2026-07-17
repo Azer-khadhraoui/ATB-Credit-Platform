@@ -10,20 +10,44 @@
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <label for="matricule">Matricule</label>
-        <div class="input-group">
+        <div class="input-group" [class.input-group--invalid]="isInvalid('matricule')">
           <i class="fa-regular fa-id-badge"></i>
           <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Entrez votre matricule" />
         </div>
+        @if (isInvalid('matricule')) {
+          <span class="field-error">
+            @if (loginForm.get('matricule')?.errors?.['required']) {
+              Le matricule est requis.
+            } @else if (loginForm.get('matricule')?.errors?.['pattern']) {
+              Le matricule doit contenir exactement 6 chiffres.
+            }
+          </span>
+        }
 
         <label for="password">Mot de passe</label>
-        <div class="input-group">
+        <div class="input-group" [class.input-group--invalid]="isInvalid('password')">
           <i class="fa-solid fa-lock"></i>
           <input id="password" type="password" formControlName="password" placeholder="Entrez votre mot de passe" />
         </div>
+        @if (isInvalid('password')) {
+          <span class="field-error">
+            @if (loginForm.get('password')?.errors?.['required']) {
+              Le mot de passe est requis.
+            } @else if (loginForm.get('password')?.errors?.['minlength']) {
+              Le mot de passe doit contenir au moins 6 caractères.
+            }
+          </span>
+        }
 
         <a class="forgot-link" href="#">Mot de passe oublié ?</a>
 
-        <button type="submit" class="sign-in-btn">Se connecter</button>
+        @if (errorMessage()) {
+          <p class="form-error">{{ errorMessage() }}</p>
+        }
+
+        <button type="submit" class="sign-in-btn" [disabled]="loading()">
+          {{ loading() ? 'Connexion…' : 'Se connecter' }}
+        </button>
       </form>
 
       <p class="create-account">

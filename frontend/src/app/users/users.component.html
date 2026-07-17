@@ -1,0 +1,70 @@
+<div class="page">
+  <div class="page__header">
+    <div class="page__title">
+      <i class="fa-solid fa-users"></i>
+      <div>
+        <h1>Utilisateurs</h1>
+        <p>Gestion des comptes administrateurs et agents de crédit</p>
+      </div>
+    </div>
+    <button type="button" class="btn btn--ghost" (click)="loadUsers()" [disabled]="loading()">
+      <i class="fa-solid fa-rotate-right"></i>
+      Actualiser
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement des utilisateurs…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state state--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else if (users().length === 0) {
+    <div class="state">
+      <i class="fa-regular fa-folder-open"></i>
+      <span>Aucun utilisateur pour le moment.</span>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Matricule</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <span class="user-cell__avatar">{{ initials(user) }}</span>
+                  <span class="user-cell__name">{{ user.firstName }} {{ user.lastName }}</span>
+                </div>
+              </td>
+              <td>{{ user.matricule }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="role-badge" [class.role-badge--admin]="user.role === 'ADMIN'">
+                  {{ roleLabel(user.role) }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <button type="button" class="icon-action icon-action--danger" (click)="deleteUser(user)" title="Supprimer">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -98,6 +98,11 @@
     box-shadow: 0 1px 2px rgba(20, 20, 30, 0.05);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
+    &--invalid {
+      border-color: var(--atb-red);
+      box-shadow: 0 0 0 3px rgba(200, 19, 79, 0.12);
+    }
+
     i {
       color: var(--muted);
       font-size: 14px;
@@ -136,6 +141,25 @@
     }
   }
 
+  .field-error {
+    display: block;
+    margin: -14px 0 16px 2px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--atb-red);
+  }
+
+  .form-error {
+    margin: 4px 0 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(200, 19, 79, 0.08);
+    border: 1px solid rgba(200, 19, 79, 0.25);
+    color: var(--atb-red-dark);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
   .sign-in-btn {
     width: 100%;
     padding: 14px;
@@ -155,6 +179,12 @@
 
     &:active {
       transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
     }
   }
 
