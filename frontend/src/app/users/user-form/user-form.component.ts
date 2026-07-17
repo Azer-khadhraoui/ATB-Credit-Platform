@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, Validati
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UserService } from '../user.service';
 import { resolvePhotoUrl } from '../user.model';
+import { AuthService } from '../../core/auth/auth.service';
 
 function optionalPasswordMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -23,6 +24,7 @@ function optionalPasswordMatch(control: AbstractControl): ValidationErrors | nul
 export class UserFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -83,8 +85,10 @@ export class UserFormComponent {
       next: (user) => {
         this.uploadingPhoto.set(false);
         // Cache-bust so the freshly uploaded image replaces the old one immediately.
-        const resolved = resolvePhotoUrl(user.photoUrl);
-        this.photoUrl.set(resolved ? `${resolved}?t=${Date.now()}` : null);
+        const cacheBusted = user.photoUrl ? `${user.photoUrl}?t=${Date.now()}` : null;
+        this.photoUrl.set(resolvePhotoUrl(cacheBusted));
+        // Keep the topbar in sync if the edited user is the one logged in.
+        this.authService.updateCurrentUserPhoto(this.matricule(), cacheBusted);
         input.value = '';
       },
       error: (err) => {
