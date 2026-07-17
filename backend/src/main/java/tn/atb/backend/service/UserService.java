@@ -3,6 +3,7 @@ package tn.atb.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tn.atb.backend.dto.user.UserCreateRequest;
 import tn.atb.backend.dto.user.UserResponse;
 import tn.atb.backend.dto.user.UserUpdateRequest;
@@ -22,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
 
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -68,8 +70,22 @@ public class UserService {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setRole(request.getRole());
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
         user.setUpdatedAt(LocalDateTime.now());
 
+        User saved = userRepository.save(user);
+        return userMapper.toResponse(saved);
+    }
+
+    public UserResponse updatePhoto(String id, MultipartFile file) {
+        User user = findUserOrThrow(id);
+        String photoUrl = fileStorageService.storeImage(file, "user-" + id);
+        user.setPhotoUrl(photoUrl);
+        user.setUpdatedAt(LocalDateTime.now());
         User saved = userRepository.save(user);
         return userMapper.toResponse(saved);
     }

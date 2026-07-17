@@ -19,14 +19,13 @@
     </div>
 
     <div class="topbar__right">
-      <button type="button" class="icon-btn" aria-label="Notifications">
-        <i class="fa-regular fa-bell"></i>
-        <span class="badge">3</span>
-      </button>
-
       <div class="profile-wrap">
         <button type="button" class="profile" (click)="toggleMenu()">
-          <span class="profile__avatar">{{ initials() }}</span>
+          @if (photoUrl()) {
+            <img class="profile__avatar profile__avatar--img" [src]="photoUrl()" [alt]="displayName()" />
+          } @else {
+            <span class="profile__avatar">{{ initials() }}</span>
+          }
           <span class="profile__info">
             <span class="profile__name">{{ displayName() }}</span>
             <span class="profile__role">{{ displayRole() }}</span>

@@ -40,6 +40,7 @@ public class AuthService {
                 .matricule(user.getMatricule())
                 .fullName(fullName)
                 .role(user.getRole())
+                .photoUrl(user.getPhotoUrl())
                 .build();
     }
 }

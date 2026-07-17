@@ -18,6 +18,7 @@ public class UserResponse {
     private String matricule;
     private String email;
     private Role role;
+    private String photoUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -8,6 +8,7 @@ export interface AuthResponse {
   matricule: string;
   fullName: string;
   role: string;
+  photoUrl?: string | null;
 }
 
 export interface SignupPayload {

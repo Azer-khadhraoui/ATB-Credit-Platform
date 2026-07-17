@@ -4,6 +4,7 @@ import { SignupComponent } from './auth/signup/signup.component';
 import { LayoutComponent } from './core/layout/layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { UsersComponent } from './users/users.component';
+import { UserFormComponent } from './users/user-form/user-form.component';
 import { ClientsComponent } from './clients/clients.component';
 import { ClientFormComponent } from './clients/client-form/client-form.component';
 import { CreditFileListComponent } from './credit-files/credit-file-list/credit-file-list.component';
@@ -24,6 +25,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'users', component: UsersComponent },
+      { path: 'users/:id/edit', component: UserFormComponent },
       { path: 'clients', component: ClientsComponent },
       { path: 'clients/new', component: ClientFormComponent, data: { visualImage: '/images/crudclientimage.png' } },
       { path: 'credit-files', component: CreditFileListComponent },

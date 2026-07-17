@@ -62,7 +62,7 @@
 
 .topbar-hero {
   &__greeting {
-    font-size: 14.5px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--ink);
     white-space: nowrap;
@@ -94,7 +94,7 @@
   }
 
   &__slogan {
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 600;
     font-style: italic;
     color: var(--muted);
@@ -198,6 +198,11 @@
     align-items: center;
     justify-content: center;
     font-size: 14px;
+    font-weight: 700;
+
+    &--img {
+      object-fit: cover;
+    }
   }
 
   &__info {
@@ -319,12 +324,12 @@
 
   &--collapsed {
     .nav-group__label,
-    .nav-link__label,
     .sidebar__footer-tagline {
       opacity: 0;
       max-width: 0;
     }
 
+    .nav-link__label,
     .nav-link__caret {
       display: none;
     }
@@ -332,6 +337,7 @@
     .nav-link {
       justify-content: center;
       align-items: center;
+      gap: 0;
       width: 52px;
       height: 52px;
       padding: 0;
@@ -425,7 +431,7 @@
   &__label {
     white-space: nowrap;
     overflow: hidden;
-    max-width: 160px;
+    max-width: 150px;
     transition: opacity 0.15s ease, max-width 0.2s ease;
   }
 
@@ -460,9 +466,11 @@
 
   &__caret {
     margin-left: auto;
-    font-size: 11px;
+    margin-right: 2px;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.55);
     flex: 0 0 auto;
-    transition: transform 0.15s ease, opacity 0.15s ease, max-width 0.2s ease;
+    transition: transform 0.15s ease, opacity 0.15s ease;
 
     &--open {
       transform: rotate(180deg);

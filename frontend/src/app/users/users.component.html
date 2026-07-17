@@ -7,10 +7,27 @@
         <p>Gestion des comptes administrateurs et agents de crédit</p>
       </div>
     </div>
-    <button type="button" class="btn btn--ghost" (click)="loadUsers()" [disabled]="loading()">
-      <i class="fa-solid fa-rotate-right"></i>
-      Actualiser
-    </button>
+    <div class="page__actions">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          placeholder="Rechercher par nom, matricule, email…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+        @if (searchTerm()) {
+          <button type="button" class="search-box__clear" (click)="searchTerm.set('')" title="Effacer">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        }
+      </div>
+
+      <button type="button" class="btn btn--ghost" (click)="loadUsers()" [disabled]="loading()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualiser
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -28,6 +45,11 @@
       <i class="fa-regular fa-folder-open"></i>
       <span>Aucun utilisateur pour le moment.</span>
     </div>
+  } @else if (filteredUsers().length === 0) {
+    <div class="state">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>Aucun résultat pour « {{ searchTerm() }} ».</span>
+    </div>
   } @else {
     <div class="table-card">
       <table class="users-table">
@@ -41,11 +63,15 @@
           </tr>
         </thead>
         <tbody>
-          @for (user of users(); track user.id) {
+          @for (user of filteredUsers(); track user.id) {
             <tr>
               <td>
                 <div class="user-cell">
-                  <span class="user-cell__avatar">{{ initials(user) }}</span>
+                  @if (photoSrc(user)) {
+                    <img class="user-cell__avatar user-cell__avatar--img" [src]="photoSrc(user)" [alt]="user.firstName" />
+                  } @else {
+                    <span class="user-cell__avatar">{{ initials(user) }}</span>
+                  }
                   <span class="user-cell__name">{{ user.firstName }} {{ user.lastName }}</span>
                 </div>
               </td>
@@ -57,9 +83,14 @@
                 </span>
               </td>
               <td class="col-actions">
-                <button type="button" class="icon-action icon-action--danger" (click)="deleteUser(user)" title="Supprimer">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <div class="action-group">
+                  <button type="button" class="icon-action" (click)="editUser(user)" title="Modifier">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button type="button" class="icon-action icon-action--danger" (click)="deleteUser(user)" title="Supprimer">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           }
