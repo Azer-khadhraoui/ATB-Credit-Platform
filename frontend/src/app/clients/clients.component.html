@@ -1,0 +1,105 @@
+<div class="page">
+  <div class="page__header">
+    <div class="page__title">
+      <i class="fa-solid fa-id-card"></i>
+      <div>
+        <h1>Clients</h1>
+        <p>Consultation et gestion des clients de la banque</p>
+      </div>
+    </div>
+    <div class="page__actions">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          placeholder="Rechercher par nom, CIN, email, ville…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+        @if (searchTerm()) {
+          <button type="button" class="search-box__clear" (click)="searchTerm.set('')" title="Effacer">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        }
+      </div>
+
+      <button type="button" class="btn btn--ghost" (click)="loadClients()" [disabled]="loading()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualiser
+      </button>
+
+      <a routerLink="/app/clients/new" class="btn btn--primary">
+        <i class="fa-solid fa-plus"></i>
+        Ajouter un client
+      </a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement des clients…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state state--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else if (clients().length === 0) {
+    <div class="state">
+      <i class="fa-regular fa-folder-open"></i>
+      <span>Aucun client pour le moment.</span>
+    </div>
+  } @else if (filteredClients().length === 0) {
+    <div class="state">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>Aucun résultat pour « {{ searchTerm() }} ».</span>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>CIN</th>
+            <th>Téléphone</th>
+            <th>Ville</th>
+            <th>Emploi</th>
+            <th>Revenu (TND)</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (client of filteredClients(); track client.id) {
+            <tr>
+              <td>
+                <div class="client-cell">
+                  <span class="client-cell__avatar">{{ initials(client) }}</span>
+                  <div class="client-cell__info">
+                    <span class="client-cell__name">{{ client.firstName }} {{ client.lastName }}</span>
+                    <span class="client-cell__email">{{ client.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ client.cin }}</td>
+              <td>{{ client.phone }}</td>
+              <td>{{ client.city }}</td>
+              <td>{{ employmentTypeLabel(client.employmentType) }}</td>
+              <td>{{ client.monthlyIncome | number: '1.0-0' }}</td>
+              <td class="col-actions">
+                <div class="action-group">
+                  <button type="button" class="icon-action" (click)="editClient(client)" title="Modifier">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button type="button" class="icon-action icon-action--danger" (click)="deleteClient(client)" title="Supprimer">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

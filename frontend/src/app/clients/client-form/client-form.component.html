@@ -1,143 +1,190 @@
 <div class="page">
   <div class="page__header">
     <i class="fa-solid fa-id-card"></i>
-    <h1>Ajouter un client</h1>
+    <h1>{{ pageTitle() }}</h1>
   </div>
 
-  <form class="form-card" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <section class="section">
-      <div class="section__title">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>Informations personnelles</span>
-      </div>
-
-      <div class="grid grid--3">
-        <div class="field">
-          <label for="cin">CIN *</label>
-          <input id="cin" type="text" formControlName="cin" placeholder="Entrez le numéro de CIN" />
-        </div>
-
-        <div class="field">
-          <label for="firstName">Prénom *</label>
-          <input id="firstName" type="text" formControlName="firstName" placeholder="Entrez le prénom" />
-        </div>
-
-        <div class="field">
-          <label for="lastName">Nom *</label>
-          <input id="lastName" type="text" formControlName="lastName" placeholder="Entrez le nom" />
-        </div>
-      </div>
-
-      <div class="grid grid--3">
-        <div class="field">
-          <label for="birthDate">Date de naissance *</label>
-          <div class="input-icon">
-            <input id="birthDate" type="date" formControlName="birthDate" />
-            <i class="fa-regular fa-calendar"></i>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="gender">Genre *</label>
-          <select id="gender" formControlName="gender">
-            <option value="" disabled selected>Sélectionner</option>
-            <option *ngFor="let gender of genders" [value]="gender">{{ gender }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="maritalStatus">Situation familiale *</label>
-          <select id="maritalStatus" formControlName="maritalStatus">
-            <option value="" disabled selected>Sélectionner</option>
-            <option *ngFor="let status of maritalStatuses" [value]="status">{{ status }}</option>
-          </select>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section__title">
-        <i class="fa-solid fa-address-book"></i>
-        <span>Coordonnées</span>
-      </div>
-
-      <div class="grid grid--4">
-        <div class="field">
-          <label for="phone">Téléphone *</label>
-          <input id="phone" type="tel" formControlName="phone" placeholder="Entrez le numéro de téléphone" />
-        </div>
-
-        <div class="field">
-          <label for="email">Email *</label>
-          <input id="email" type="email" formControlName="email" placeholder="Entrez l'adresse email" />
-        </div>
-
-        <div class="field">
-          <label for="address">Adresse *</label>
-          <input id="address" type="text" formControlName="address" placeholder="Entrez l'adresse" />
-        </div>
-
-        <div class="field">
-          <label for="city">Ville *</label>
-          <input id="city" type="text" formControlName="city" placeholder="Entrez la ville" />
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section__title">
-        <i class="fa-solid fa-briefcase"></i>
-        <span>Situation professionnelle</span>
-      </div>
-
-      <div class="grid grid--3">
-        <div class="field">
-          <label for="profession">Profession</label>
-          <input id="profession" type="text" formControlName="profession" placeholder="Entrez la profession" />
-        </div>
-
-        <div class="field">
-          <label for="employer">Employeur</label>
-          <input id="employer" type="text" formControlName="employer" placeholder="Entrez l'employeur" />
-        </div>
-
-        <div class="field">
-          <label for="employmentType">Type d'emploi *</label>
-          <select id="employmentType" formControlName="employmentType">
-            <option value="" disabled selected>Sélectionner</option>
-            <option *ngFor="let type of employmentTypes" [value]="type">{{ type }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="grid grid--3">
-        <div class="field">
-          <label for="monthlyIncome">Revenu mensuel (TND) *</label>
-          <div class="input-icon">
-            <input id="monthlyIncome" type="number" formControlName="monthlyIncome" placeholder="Entrez le revenu" />
-            <i class="fa-regular fa-file-lines"></i>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="monthlyExpenses">Charges mensuelles (TND)</label>
-          <div class="input-icon">
-            <input id="monthlyExpenses" type="number" formControlName="monthlyExpenses" placeholder="Entrez les charges" />
-            <i class="fa-regular fa-file-lines"></i>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="form-actions">
-      <button type="button" class="btn btn--ghost" routerLink="/app/clients">
-        <i class="fa-solid fa-xmark"></i>
-        Annuler
-      </button>
-      <button type="submit" class="btn btn--primary">
-        <i class="fa-regular fa-floppy-disk"></i>
-        Enregistrer
-      </button>
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement…</span>
     </div>
-  </form>
+  } @else {
+    <form class="form-card" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <section class="section">
+        <div class="section__title">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Informations personnelles</span>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="field">
+            <label for="cin">CIN *</label>
+            <input id="cin" type="text" formControlName="cin" placeholder="Entrez le numéro de CIN" [class.invalid]="isInvalid('cin')" />
+            @if (isInvalid('cin')) {
+              <span class="field-error">Le CIN est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="firstName">Prénom *</label>
+            <input id="firstName" type="text" formControlName="firstName" placeholder="Entrez le prénom" [class.invalid]="isInvalid('firstName')" />
+            @if (isInvalid('firstName')) {
+              <span class="field-error">Le prénom est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="lastName">Nom *</label>
+            <input id="lastName" type="text" formControlName="lastName" placeholder="Entrez le nom" [class.invalid]="isInvalid('lastName')" />
+            @if (isInvalid('lastName')) {
+              <span class="field-error">Le nom est requis.</span>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="field">
+            <label for="birthDate">Date de naissance *</label>
+            <div class="input-icon">
+              <input id="birthDate" type="date" formControlName="birthDate" [class.invalid]="isInvalid('birthDate')" />
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+            @if (isInvalid('birthDate')) {
+              <span class="field-error">La date de naissance est requise.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="gender">Genre *</label>
+            <select id="gender" formControlName="gender" [class.invalid]="isInvalid('gender')">
+              <option value="" disabled selected>Sélectionner</option>
+              <option *ngFor="let g of genders" [value]="g.value">{{ g.label }}</option>
+            </select>
+            @if (isInvalid('gender')) {
+              <span class="field-error">Le genre est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="maritalStatus">Situation familiale *</label>
+            <select id="maritalStatus" formControlName="maritalStatus" [class.invalid]="isInvalid('maritalStatus')">
+              <option value="" disabled selected>Sélectionner</option>
+              <option *ngFor="let s of maritalStatuses" [value]="s.value">{{ s.label }}</option>
+            </select>
+            @if (isInvalid('maritalStatus')) {
+              <span class="field-error">La situation familiale est requise.</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section__title">
+          <i class="fa-solid fa-address-book"></i>
+          <span>Coordonnées</span>
+        </div>
+
+        <div class="grid grid--4">
+          <div class="field">
+            <label for="phone">Téléphone *</label>
+            <input id="phone" type="tel" formControlName="phone" placeholder="Entrez le numéro de téléphone" [class.invalid]="isInvalid('phone')" />
+            @if (isInvalid('phone')) {
+              <span class="field-error">Le téléphone est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="email">Email *</label>
+            <input id="email" type="email" formControlName="email" placeholder="Entrez l'adresse email" [class.invalid]="isInvalid('email')" />
+            @if (isInvalid('email')) {
+              <span class="field-error">Adresse email requise et valide.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="address">Adresse *</label>
+            <input id="address" type="text" formControlName="address" placeholder="Entrez l'adresse" [class.invalid]="isInvalid('address')" />
+            @if (isInvalid('address')) {
+              <span class="field-error">L'adresse est requise.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="city">Ville *</label>
+            <input id="city" type="text" formControlName="city" placeholder="Entrez la ville" [class.invalid]="isInvalid('city')" />
+            @if (isInvalid('city')) {
+              <span class="field-error">La ville est requise.</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section__title">
+          <i class="fa-solid fa-briefcase"></i>
+          <span>Situation professionnelle</span>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="field">
+            <label for="profession">Profession</label>
+            <input id="profession" type="text" formControlName="profession" placeholder="Entrez la profession" />
+          </div>
+
+          <div class="field">
+            <label for="employer">Employeur</label>
+            <input id="employer" type="text" formControlName="employer" placeholder="Entrez l'employeur" />
+          </div>
+
+          <div class="field">
+            <label for="employmentType">Type d'emploi *</label>
+            <select id="employmentType" formControlName="employmentType" [class.invalid]="isInvalid('employmentType')">
+              <option value="" disabled selected>Sélectionner</option>
+              <option *ngFor="let t of employmentTypes" [value]="t.value">{{ t.label }}</option>
+            </select>
+            @if (isInvalid('employmentType')) {
+              <span class="field-error">Le type d'emploi est requis.</span>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="field">
+            <label for="monthlyIncome">Revenu mensuel (TND) *</label>
+            <div class="input-icon">
+              <input id="monthlyIncome" type="number" formControlName="monthlyIncome" placeholder="Entrez le revenu" [class.invalid]="isInvalid('monthlyIncome')" />
+              <i class="fa-regular fa-file-lines"></i>
+            </div>
+            @if (isInvalid('monthlyIncome')) {
+              <span class="field-error">Le revenu mensuel est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="monthlyExpenses">Charges mensuelles (TND)</label>
+            <div class="input-icon">
+              <input id="monthlyExpenses" type="number" formControlName="monthlyExpenses" placeholder="Entrez les charges" />
+              <i class="fa-regular fa-file-lines"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn--ghost" routerLink="/app/clients">
+          <i class="fa-solid fa-xmark"></i>
+          Annuler
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          <i class="fa-regular fa-floppy-disk"></i>
+          {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  }
 </div>
