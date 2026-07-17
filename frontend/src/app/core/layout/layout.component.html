@@ -6,20 +6,47 @@
       </div>
     </div>
 
+    <div class="topbar__center">
+      <span class="topbar-hero__greeting">
+        {{ greeting() }}@if (firstName()) {<span class="topbar-hero__name">, {{ firstName() }}</span>}
+      </span>
+      <span class="topbar-hero__divider"></span>
+      <span class="topbar-hero__slogan-wrap">
+        @for (line of [slogan()]; track line) {
+          <span class="topbar-hero__slogan">« {{ line }} »</span>
+        }
+      </span>
+    </div>
+
     <div class="topbar__right">
       <button type="button" class="icon-btn" aria-label="Notifications">
         <i class="fa-regular fa-bell"></i>
         <span class="badge">3</span>
       </button>
 
-      <button type="button" class="profile">
-        <span class="profile__avatar"><i class="fa-solid fa-user"></i></span>
-        <span class="profile__info">
-          <span class="profile__name">Admin ATB</span>
-          <span class="profile__role">ADMIN</span>
-        </span>
-        <i class="fa-solid fa-chevron-down profile__chevron"></i>
-      </button>
+      <div class="profile-wrap">
+        <button type="button" class="profile" (click)="toggleMenu()">
+          <span class="profile__avatar">{{ initials() }}</span>
+          <span class="profile__info">
+            <span class="profile__name">{{ displayName() }}</span>
+            <span class="profile__role">{{ displayRole() }}</span>
+          </span>
+          <i class="fa-solid fa-chevron-down profile__chevron"></i>
+        </button>
+
+        @if (menuOpen()) {
+          <div class="profile-menu">
+            <div class="profile-menu__header">
+              <span class="profile-menu__name">{{ displayName() }}</span>
+              <span class="profile-menu__matricule">Matricule {{ currentUser()?.matricule }}</span>
+            </div>
+            <button type="button" class="profile-menu__item" (click)="logout()">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Se déconnecter
+            </button>
+          </div>
+        }
+      </div>
     </div>
   </header>
 

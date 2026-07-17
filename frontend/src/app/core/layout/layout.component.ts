@@ -1,9 +1,18 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter, map, startWith } from 'rxjs';
+import { filter, interval, map, startWith } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '../auth/auth.service';
 
 const DEFAULT_VISUAL_IMAGE = '/images/imagecrud1.png';
+
+const SLOGANS = [
+  'Des professionnels à l\'écoute',
+  'Ensemble, pour la réussite',
+  'Votre partenaire crédit de confiance'
+];
+
+const SLOGAN_INTERVAL_MS = 4000;
 
 @Component({
   selector: 'app-layout',
@@ -15,10 +24,48 @@ const DEFAULT_VISUAL_IMAGE = '/images/imagecrud1.png';
 export class LayoutComponent {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly authService = inject(AuthService);
 
   sidebarOpen = signal(false);
   creditFilesExpanded = signal(true);
   clientsExpanded = signal(true);
+  menuOpen = signal(false);
+
+  readonly currentUser = this.authService.currentUser;
+  readonly displayName = computed(() => this.currentUser()?.fullName ?? 'Utilisateur');
+  readonly displayRole = computed(() =>
+    this.currentUser()?.role === 'ADMIN' ? 'Administrateur' : 'Agent de crédit'
+  );
+  readonly initials = computed(() => {
+    const name = this.currentUser()?.fullName?.trim();
+    if (!name) {
+      return 'U';
+    }
+    const parts = name.split(/\s+/);
+    const first = parts[0]?.charAt(0) ?? '';
+    const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (first + last).toUpperCase();
+  });
+
+  readonly firstName = computed(() => this.currentUser()?.fullName?.trim().split(/\s+/)[0] ?? '');
+
+  readonly greeting = computed(() => {
+    const hour = new Date().getHours();
+    return hour >= 5 && hour < 18 ? 'Bonjour' : 'Bonsoir';
+  });
+
+  private readonly sloganTick = toSignal(interval(SLOGAN_INTERVAL_MS).pipe(startWith(-1)), { initialValue: -1 });
+  readonly slogan = computed(() => SLOGANS[(this.sloganTick() + 1) % SLOGANS.length]);
+
+  toggleMenu(): void {
+    this.menuOpen.update((open) => !open);
+  }
+
+  logout(): void {
+    this.menuOpen.set(false);
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 
   visualImage = toSignal(
     this.router.events.pipe(

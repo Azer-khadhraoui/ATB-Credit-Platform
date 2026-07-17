@@ -10,6 +10,7 @@ import { CreditFileListComponent } from './credit-files/credit-file-list/credit-
 import { CreditFileFormComponent } from './credit-files/credit-file-form/credit-file-form.component';
 import { AuditComponent } from './audit/audit.component';
 import { SettingsComponent } from './shared/settings/settings.component';
+import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -18,6 +19,7 @@ export const routes: Routes = [
   {
     path: 'app',
     component: LayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },

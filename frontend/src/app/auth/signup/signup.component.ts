@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -16,7 +17,12 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
   styleUrl: './signup.component.scss'
 })
 export class SignupComponent {
-  private readonly fb = new FormBuilder();
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  readonly loading = signal(false);
+  readonly errorMessage = signal<string | null>(null);
 
   signupForm: FormGroup = this.fb.group(
     {
@@ -30,11 +36,46 @@ export class SignupComponent {
     { validators: passwordsMatchValidator }
   );
 
+  isInvalid(controlName: string): boolean {
+    const control = this.signupForm.get(controlName);
+    return !!control && control.invalid && (control.touched || control.dirty);
+  }
+
+  showMismatch(): boolean {
+    const confirm = this.signupForm.get('confirmPassword');
+    return (
+      this.signupForm.hasError('passwordsMismatch') &&
+      !!confirm?.value &&
+      (confirm.touched || confirm.dirty)
+    );
+  }
+
   onSubmit(): void {
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
       return;
     }
-    console.log(this.signupForm.value);
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    const value = this.signupForm.getRawValue();
+
+    this.authService
+      .signup({
+        firstName: value.firstName,
+        lastName: value.lastName,
+        matricule: value.matricule,
+        email: value.email,
+        password: value.password,
+        role: 'AGENT_CREDIT'
+      })
+      .subscribe({
+        next: () => this.router.navigate(['/login']),
+        error: (err) => {
+          this.loading.set(false);
+          this.errorMessage.set(err?.error?.message ?? "Échec de la création du compte. Réessayez.");
+        }
+      });
   }
 }

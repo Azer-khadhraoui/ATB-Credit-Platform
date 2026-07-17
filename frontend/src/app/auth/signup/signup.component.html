@@ -12,52 +12,96 @@
         <div class="field-row">
           <div class="field-col">
             <label for="firstName">Prénom</label>
-            <div class="input-group">
+            <div class="input-group" [class.input-group--invalid]="isInvalid('firstName')">
               <i class="fa-regular fa-user"></i>
               <input id="firstName" type="text" formControlName="firstName" placeholder="Entrez votre prénom" />
             </div>
+            @if (isInvalid('firstName')) {
+              <span class="field-error">Le prénom est requis.</span>
+            }
           </div>
 
           <div class="field-col">
             <label for="lastName">Nom</label>
-            <div class="input-group">
+            <div class="input-group" [class.input-group--invalid]="isInvalid('lastName')">
               <i class="fa-regular fa-user"></i>
               <input id="lastName" type="text" formControlName="lastName" placeholder="Entrez votre nom" />
             </div>
+            @if (isInvalid('lastName')) {
+              <span class="field-error">Le nom est requis.</span>
+            }
           </div>
         </div>
 
         <label for="matricule">Matricule</label>
-        <div class="input-group">
+        <div class="input-group" [class.input-group--invalid]="isInvalid('matricule')">
           <i class="fa-regular fa-id-badge"></i>
           <input id="matricule" type="text" inputmode="numeric" maxlength="6" formControlName="matricule" placeholder="Entrez votre matricule" />
         </div>
+        @if (isInvalid('matricule')) {
+          <span class="field-error">
+            @if (signupForm.get('matricule')?.errors?.['required']) {
+              Le matricule est requis.
+            } @else if (signupForm.get('matricule')?.errors?.['pattern']) {
+              Le matricule doit contenir exactement 6 chiffres.
+            }
+          </span>
+        }
 
         <label for="email">Email</label>
-        <div class="input-group">
+        <div class="input-group" [class.input-group--invalid]="isInvalid('email')">
           <i class="fa-regular fa-envelope"></i>
           <input id="email" type="email" formControlName="email" placeholder="Entrez votre adresse email" />
         </div>
+        @if (isInvalid('email')) {
+          <span class="field-error">
+            @if (signupForm.get('email')?.errors?.['required']) {
+              L'email est requis.
+            } @else if (signupForm.get('email')?.errors?.['email']) {
+              L'adresse email n'est pas valide.
+            }
+          </span>
+        }
 
         <div class="field-row">
           <div class="field-col">
             <label for="password">Mot de passe</label>
-            <div class="input-group">
+            <div class="input-group" [class.input-group--invalid]="isInvalid('password')">
               <i class="fa-solid fa-lock"></i>
               <input id="password" type="password" formControlName="password" placeholder="Créez un mot de passe" />
             </div>
+            @if (isInvalid('password')) {
+              <span class="field-error">
+                @if (signupForm.get('password')?.errors?.['required']) {
+                  Le mot de passe est requis.
+                } @else if (signupForm.get('password')?.errors?.['minlength']) {
+                  Au moins 8 caractères.
+                }
+              </span>
+            }
           </div>
 
           <div class="field-col">
             <label for="confirmPassword">Confirmer le mot de passe</label>
-            <div class="input-group">
+            <div class="input-group" [class.input-group--invalid]="isInvalid('confirmPassword') || showMismatch()">
               <i class="fa-solid fa-lock"></i>
               <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Confirmez votre mot de passe" />
             </div>
+            @if (isInvalid('confirmPassword')) {
+              <span class="field-error">La confirmation est requise.</span>
+            } @else if (showMismatch()) {
+              <span class="field-error">Les mots de passe ne correspondent pas.</span>
+            }
           </div>
         </div>
 
-        <button type="submit" class="sign-in-btn">Créer un compte</button>
+        @if (errorMessage()) {
+          <p class="form-error">{{ errorMessage() }}</p>
+        }
+
+        <button type="submit" class="sign-in-btn" [disabled]="loading()">
+          {{ loading() ? 'Création…' : 'Créer un compte' }}
+        </button>
       </form>
 
       <p class="create-account">
