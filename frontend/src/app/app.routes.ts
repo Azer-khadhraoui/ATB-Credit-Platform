@@ -28,6 +28,7 @@ export const routes: Routes = [
       { path: 'users/:id/edit', component: UserFormComponent },
       { path: 'clients', component: ClientsComponent },
       { path: 'clients/new', component: ClientFormComponent, data: { visualImage: '/images/crudclientimage.png' } },
+      { path: 'clients/:id/edit', component: ClientFormComponent, data: { visualImage: '/images/crudclientimage.png' } },
       { path: 'credit-files', component: CreditFileListComponent },
       { path: 'credit-files/new', component: CreditFileFormComponent, data: { visualImage: '/images/imagecrud1.png' } },
       { path: 'audit', component: AuditComponent },
