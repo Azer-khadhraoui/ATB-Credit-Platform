@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import tn.atb.backend.dto.user.UserCreateRequest;
 import tn.atb.backend.dto.user.UserResponse;
 import tn.atb.backend.dto.user.UserUpdateRequest;
@@ -44,6 +46,12 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable String id, @Valid @RequestBody UserUpdateRequest request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
+    }
+
+    @PostMapping("/{id}/photo")
+    public ResponseEntity<UserResponse> uploadPhoto(@PathVariable String id,
+                                                    @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(userService.updatePhoto(id, file));
     }
 
     @DeleteMapping("/{id}")

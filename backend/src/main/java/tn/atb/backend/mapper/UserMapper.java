@@ -15,6 +15,7 @@ public class UserMapper {
                 .matricule(user.getMatricule())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .photoUrl(user.getPhotoUrl())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

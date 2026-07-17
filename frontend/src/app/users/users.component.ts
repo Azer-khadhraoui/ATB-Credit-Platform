@@ -1,19 +1,35 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UserService } from './user.service';
-import { User } from './user.model';
+import { User, resolvePhotoUrl } from './user.model';
 
 @Component({
   selector: 'app-users',
   standalone: true,
+  imports: [FormsModule],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
 export class UsersComponent {
   private readonly userService = inject(UserService);
+  private readonly router = inject(Router);
 
   readonly users = signal<User[]>([]);
   readonly loading = signal(true);
   readonly errorMessage = signal<string | null>(null);
+  readonly searchTerm = signal('');
+
+  readonly filteredUsers = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    if (!term) {
+      return this.users();
+    }
+    return this.users().filter((user) => {
+      const haystack = `${user.firstName} ${user.lastName} ${user.matricule} ${user.email}`.toLowerCase();
+      return haystack.includes(term);
+    });
+  });
 
   constructor() {
     this.loadUsers();
@@ -35,6 +51,10 @@ export class UsersComponent {
     });
   }
 
+  editUser(user: User): void {
+    this.router.navigate(['/app/users', user.id, 'edit']);
+  }
+
   deleteUser(user: User): void {
     if (!confirm(`Supprimer l'utilisateur ${user.firstName} ${user.lastName} ?`)) {
       return;
@@ -48,6 +68,10 @@ export class UsersComponent {
 
   initials(user: User): string {
     return (user.firstName.charAt(0) + user.lastName.charAt(0)).toUpperCase();
+  }
+
+  photoSrc(user: User): string | null {
+    return resolvePhotoUrl(user.photoUrl);
   }
 
   roleLabel(role: string): string {

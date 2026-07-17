@@ -3,6 +3,7 @@ import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, Ro
 import { filter, interval, map, startWith } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../auth/auth.service';
+import { resolvePhotoUrl } from '../../users/user.model';
 
 const DEFAULT_VISUAL_IMAGE = '/images/imagecrud1.png';
 
@@ -47,6 +48,7 @@ export class LayoutComponent {
     return (first + last).toUpperCase();
   });
 
+  readonly photoUrl = computed(() => resolvePhotoUrl(this.currentUser()?.photoUrl));
   readonly firstName = computed(() => this.currentUser()?.fullName?.trim().split(/\s+/)[0] ?? '');
 
   readonly greeting = computed(() => {

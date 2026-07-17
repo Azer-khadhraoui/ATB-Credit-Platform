@@ -14,4 +14,5 @@ public class AuthResponse {
     private String matricule;
     private String fullName;
     private Role role;
+    private String photoUrl;
 }

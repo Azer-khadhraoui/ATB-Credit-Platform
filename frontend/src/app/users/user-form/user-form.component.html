@@ -1,0 +1,129 @@
+<div class="page">
+  <div class="page__header">
+    <i class="fa-solid fa-user-pen"></i>
+    <h1>Modifier l'utilisateur</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement…</span>
+    </div>
+  } @else {
+    <form class="form-card" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="photo-row">
+        <div class="photo-avatar">
+          @if (photoUrl()) {
+            <img [src]="photoUrl()" alt="Photo de profil" />
+          } @else {
+            <span class="photo-avatar__initials">{{ formInitials }}</span>
+          }
+          @if (uploadingPhoto()) {
+            <div class="photo-avatar__overlay"><i class="fa-solid fa-spinner fa-spin"></i></div>
+          }
+        </div>
+
+        <div class="photo-info">
+          <span class="photo-info__title">Photo de profil</span>
+          <span class="photo-info__hint">PNG, JPEG ou WEBP · 2 Mo max</span>
+          <label class="btn btn--ghost photo-info__btn">
+            <i class="fa-solid fa-camera"></i>
+            {{ photoUrl() ? 'Changer la photo' : 'Ajouter une photo' }}
+            <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onPhotoSelected($event)" hidden [disabled]="uploadingPhoto()" />
+          </label>
+          @if (photoError()) {
+            <span class="field-error">{{ photoError() }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="matricule">Matricule</label>
+          <input id="matricule" type="text" [value]="matricule()" disabled />
+          <span class="field-hint">Le matricule ne peut pas être modifié.</span>
+        </div>
+
+        <div class="field">
+          <label for="role">Rôle *</label>
+          <select id="role" formControlName="role" [class.invalid]="isInvalid('role')">
+            <option value="" disabled>Sélectionner</option>
+            <option value="ADMIN">Administrateur</option>
+            <option value="AGENT_CREDIT">Agent de crédit</option>
+          </select>
+          @if (isInvalid('role')) {
+            <span class="field-error">Le rôle est requis.</span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="firstName">Prénom *</label>
+          <input id="firstName" type="text" formControlName="firstName" placeholder="Prénom" [class.invalid]="isInvalid('firstName')" />
+          @if (isInvalid('firstName')) {
+            <span class="field-error">Le prénom est requis.</span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="lastName">Nom *</label>
+          <input id="lastName" type="text" formControlName="lastName" placeholder="Nom" [class.invalid]="isInvalid('lastName')" />
+          @if (isInvalid('lastName')) {
+            <span class="field-error">Le nom est requis.</span>
+          }
+        </div>
+
+        <div class="field field--full">
+          <label for="email">Email *</label>
+          <input id="email" type="email" formControlName="email" placeholder="Adresse email" [class.invalid]="isInvalid('email')" />
+          @if (isInvalid('email')) {
+            <span class="field-error">
+              @if (form.get('email')?.errors?.['required']) {
+                L'email est requis.
+              } @else {
+                L'adresse email n'est pas valide.
+              }
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="section-divider">
+        <span>Mot de passe</span>
+        <small>Laissez vide pour conserver le mot de passe actuel.</small>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="password">Nouveau mot de passe</label>
+          <input id="password" type="password" formControlName="password" placeholder="Au moins 8 caractères" [class.invalid]="isInvalid('password')" />
+          @if (isInvalid('password')) {
+            <span class="field-error">Le mot de passe doit contenir au moins 8 caractères.</span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirmer le mot de passe</label>
+          <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Confirmez le mot de passe" [class.invalid]="showMismatch()" />
+          @if (showMismatch()) {
+            <span class="field-error">Les mots de passe ne correspondent pas.</span>
+          }
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn--ghost" routerLink="/app/users">
+          <i class="fa-solid fa-xmark"></i>
+          Annuler
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          <i class="fa-regular fa-floppy-disk"></i>
+          {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>
