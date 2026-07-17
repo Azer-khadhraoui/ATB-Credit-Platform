@@ -46,6 +46,20 @@ export class AuthService {
     this.currentUser.set(null);
   }
 
+  /**
+   * Updates the in-session photo when the logged-in user edits their own avatar,
+   * so the topbar reflects it without requiring a re-login.
+   */
+  updateCurrentUserPhoto(matricule: string, photoUrl: string | null): void {
+    const current = this.currentUser();
+    if (!current || current.matricule !== matricule) {
+      return;
+    }
+    const updated = { ...current, photoUrl };
+    localStorage.setItem(USER_KEY, JSON.stringify(updated));
+    this.currentUser.set(updated);
+  }
+
   get token(): string | null {
     return localStorage.getItem(TOKEN_KEY);
   }
