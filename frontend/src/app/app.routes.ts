@@ -12,6 +12,7 @@ import { CreditFileFormComponent } from './credit-files/credit-file-form/credit-
 import { AuditComponent } from './audit/audit.component';
 import { SettingsComponent } from './shared/settings/settings.component';
 import { authGuard } from './core/auth/auth.guard';
+import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -23,7 +24,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
+      { path: 'dashboard', component: DashboardComponent, data: { visualImage: '/images/imagetabdebord.png' } },
       { path: 'users', component: UsersComponent, data: { visualImage: '/images/utilisateurpageimage.png' } },
       { path: 'users/:id/edit', component: UserFormComponent, data: { visualImage: '/images/utilisateurpageimage.png' } },
       { path: 'clients', component: ClientsComponent, data: { visualImage: '/images/crudclientimage.png' } },
@@ -31,7 +32,12 @@ export const routes: Routes = [
       { path: 'clients/:id/edit', component: ClientFormComponent, data: { visualImage: '/images/crudclientimage.png' } },
       { path: 'credit-files', component: CreditFileListComponent },
       { path: 'credit-files/new', component: CreditFileFormComponent, data: { visualImage: '/images/imagecrud1.png' } },
-      { path: 'audit', component: AuditComponent },
+      {
+        path: 'audit',
+        component: AuditComponent,
+        canActivate: [adminGuard],
+        data: { visualImage: '/images/imagelogs.png' }
+      },
       { path: 'settings', component: SettingsComponent }
     ]
   }
