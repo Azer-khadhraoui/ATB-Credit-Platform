@@ -514,9 +514,9 @@
 }
 
 .sidebar__footer-logo {
-  font-weight: 900;
-  font-size: 19px;
-  letter-spacing: 0.04em;
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
 }
 
 .sidebar__footer-tagline {
