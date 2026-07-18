@@ -48,6 +48,7 @@ export class LayoutComponent {
     return (first + last).toUpperCase();
   });
 
+  readonly isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
   readonly photoUrl = computed(() => resolvePhotoUrl(this.currentUser()?.photoUrl));
   readonly firstName = computed(() => this.currentUser()?.fullName?.trim().split(/\s+/)[0] ?? '');
 

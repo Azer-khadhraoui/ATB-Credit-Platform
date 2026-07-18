@@ -138,10 +138,12 @@
         <div class="nav-group">
           <span class="nav-group__label">Système</span>
 
-          <a routerLink="/app/audit" routerLinkActive="nav-link--active" class="nav-link" title="Audit Logs">
-            <span class="nav-link__icon"><i class="fa-solid fa-clipboard-list"></i></span>
-            <span class="nav-link__label">Audit Logs</span>
-          </a>
+          @if (isAdmin()) {
+            <a routerLink="/app/audit" routerLinkActive="nav-link--active" class="nav-link" title="Audit Logs">
+              <span class="nav-link__icon"><i class="fa-solid fa-clipboard-list"></i></span>
+              <span class="nav-link__label">Audit Logs</span>
+            </a>
+          }
 
           <a routerLink="/app/settings" routerLinkActive="nav-link--active" class="nav-link" title="Paramètres">
             <span class="nav-link__icon"><i class="fa-solid fa-gear"></i></span>
