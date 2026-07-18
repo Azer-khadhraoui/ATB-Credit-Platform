@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 
 export interface AuthResponse {
   token: string;
+  id: string;
   matricule: string;
   fullName: string;
   role: string;
@@ -47,15 +48,15 @@ export class AuthService {
   }
 
   /**
-   * Updates the in-session photo when the logged-in user edits their own avatar,
-   * so the topbar reflects it without requiring a re-login.
+   * Patches the in-session profile (photo, name, ...) when the logged-in user edits
+   * their own account, so the topbar reflects it without requiring a re-login.
    */
-  updateCurrentUserPhoto(matricule: string, photoUrl: string | null): void {
+  updateCurrentSession(userId: string, patch: Partial<Pick<AuthResponse, 'fullName' | 'photoUrl'>>): void {
     const current = this.currentUser();
-    if (!current || current.matricule !== matricule) {
+    if (!current || current.id !== userId) {
       return;
     }
-    const updated = { ...current, photoUrl };
+    const updated = { ...current, ...patch };
     localStorage.setItem(USER_KEY, JSON.stringify(updated));
     this.currentUser.set(updated);
   }

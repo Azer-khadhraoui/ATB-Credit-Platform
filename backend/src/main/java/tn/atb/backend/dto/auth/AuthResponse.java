@@ -11,6 +11,7 @@ import tn.atb.backend.entity.enums.Role;
 public class AuthResponse {
 
     private String token;
+    private String id;
     private String matricule;
     private String fullName;
     private Role role;

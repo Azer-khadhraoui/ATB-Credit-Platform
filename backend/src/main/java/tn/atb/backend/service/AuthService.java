@@ -42,6 +42,7 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .token(token)
+                .id(user.getId())
                 .matricule(user.getMatricule())
                 .fullName(fullName)
                 .role(user.getRole())
