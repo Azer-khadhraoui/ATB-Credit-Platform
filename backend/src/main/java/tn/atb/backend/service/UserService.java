@@ -8,6 +8,7 @@ import tn.atb.backend.dto.user.UserCreateRequest;
 import tn.atb.backend.dto.user.UserResponse;
 import tn.atb.backend.dto.user.UserUpdateRequest;
 import tn.atb.backend.entity.User;
+import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.exception.DuplicateResourceException;
 import tn.atb.backend.exception.ResourceNotFoundException;
 import tn.atb.backend.mapper.UserMapper;
@@ -24,6 +25,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
+    private final AuditLogService auditLogService;
 
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -45,6 +47,11 @@ public class UserService {
                 .build();
 
         User saved = userRepository.save(user);
+
+        String fullName = saved.getFirstName() + " " + saved.getLastName();
+        auditLogService.log(saved.getMatricule(), AuditAction.CREATE, "User", saved.getId(),
+                "Création du compte " + fullName);
+
         return userMapper.toResponse(saved);
     }
 
@@ -78,6 +85,10 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
 
         User saved = userRepository.save(user);
+
+        auditLogService.log(AuditAction.UPDATE, "User", saved.getId(),
+                "Modification du compte " + saved.getFirstName() + " " + saved.getLastName());
+
         return userMapper.toResponse(saved);
     }
 
@@ -92,7 +103,10 @@ public class UserService {
 
     public void deleteUser(String id) {
         User user = findUserOrThrow(id);
+        String fullName = user.getFirstName() + " " + user.getLastName();
         userRepository.delete(user);
+
+        auditLogService.log(AuditAction.DELETE, "User", id, "Suppression du compte " + fullName);
     }
 
     private User findUserOrThrow(String id) {

@@ -87,6 +87,9 @@
               </td>
               <td class="col-actions">
                 <div class="action-group">
+                  <a [routerLink]="['/app/credit-files', creditFile.id]" class="icon-action" title="Voir le dossier">
+                    <i class="fa-solid fa-eye"></i>
+                  </a>
                   <button type="button" class="icon-action" (click)="editCreditFile(creditFile)" title="Modifier">
                     <i class="fa-solid fa-pen"></i>
                   </button>

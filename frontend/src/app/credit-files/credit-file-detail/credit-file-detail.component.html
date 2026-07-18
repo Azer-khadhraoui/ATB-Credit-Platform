@@ -1,0 +1,160 @@
+<div class="page">
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state state--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else if (creditFile()) {
+    @let cf = creditFile()!;
+    <div class="page__header">
+      <div class="page__title">
+        <i class="fa-solid fa-folder-open"></i>
+        <div>
+          <h1>Dossier de {{ cf.clientFullName ?? 'client' }}</h1>
+          <p>CIN {{ cf.clientCin }} · Créé le {{ cf.createdAt | date: 'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+      <div class="page__actions">
+        <span class="status-badge" [class]="'status-badge--' + cf.status.toLowerCase()">
+          {{ statusLabel(cf.status) }}
+        </span>
+        <a [routerLink]="['/app/credit-files', cf.id, 'edit']" class="btn btn--primary">
+          <i class="fa-solid fa-pen"></i>
+          Modifier
+        </a>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-col">
+        <section class="section">
+          <div class="section__title">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Informations générales</span>
+          </div>
+          <div class="tile-grid">
+            <div class="tile">
+              <span class="tile__label">Type de crédit</span>
+              <span class="tile__value">{{ cf.creditType }}</span>
+            </div>
+            <div class="tile">
+              <span class="tile__label">Montant demandé</span>
+              <span class="tile__value">{{ cf.loanAmount | number: '1.0-0' }} TND</span>
+            </div>
+            <div class="tile">
+              <span class="tile__label">Durée</span>
+              <span class="tile__value">{{ cf.loanDurationMonths }} mois</span>
+            </div>
+            <div class="tile tile--full">
+              <span class="tile__label">Objet du crédit</span>
+              <span class="tile__value">{{ cf.loanPurpose }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__title">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Modalités du prêt</span>
+          </div>
+          <div class="tile-grid">
+            <div class="tile">
+              <span class="tile__label">Taux d'intérêt</span>
+              <span class="tile__value">{{ cf.interestRate != null ? (cf.interestRate + ' %') : '—' }}</span>
+            </div>
+            <div class="tile">
+              <span class="tile__label">Apport initial</span>
+              <span class="tile__value">{{ cf.downPayment != null ? (cf.downPayment | number: '1.0-0') + ' TND' : '—' }}</span>
+            </div>
+            <div class="tile">
+              <span class="tile__label">Crédits en cours</span>
+              <span class="tile__value">{{ cf.existingCredits ?? '—' }}</span>
+            </div>
+            <div class="tile">
+              <span class="tile__label">Mensualité estimée</span>
+              <span class="tile__value">{{ cf.monthlyInstallment != null ? (cf.monthlyInstallment | number: '1.0-0') + ' TND' : '—' }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__title">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Garanties et historique</span>
+          </div>
+          <div class="tile-grid">
+            <div class="tile">
+              <span class="tile__label">Type de garantie</span>
+              <span class="tile__value">{{ cf.guaranteeType || '—' }}</span>
+            </div>
+            <div class="tile tile--full">
+              <span class="tile__label">Historique de crédit</span>
+              <span class="tile__value">{{ cf.creditHistory || '—' }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__title">
+            <i class="fa-solid fa-comment-dots"></i>
+            <span>Avis de l'agent</span>
+          </div>
+          <div class="tile-grid">
+            <div class="tile">
+              <span class="tile__label">Avis</span>
+              <span class="tile__value">{{ cf.agentDecision || '—' }}</span>
+            </div>
+            <div class="tile tile--full">
+              <span class="tile__label">Commentaires</span>
+              <span class="tile__value">{{ cf.comments || '—' }}</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="detail-col detail-col--side">
+        <section class="ai-panel">
+          <div class="ai-panel__header">
+            <span class="ai-panel__badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Module IA</span>
+            <h2>Analyse et décision</h2>
+            <p>Score de risque, niveau et décision recommandée générés par le moteur d'analyse.</p>
+          </div>
+
+          @if (hasAnalysis(cf)) {
+            <div class="ai-result">
+              <div class="ai-result__score">
+                <span class="ai-result__score-value">{{ cf.riskScore }}</span>
+                <span class="ai-result__score-label">Score de risque</span>
+              </div>
+              <div class="ai-result__meta">
+                <span class="risk-badge" [class]="'risk-badge--' + (cf.riskLevel ?? '').toLowerCase()">
+                  {{ riskLevelLabel(cf.riskLevel) }}
+                </span>
+                <span class="ai-decision">{{ cf.aiDecision }}</span>
+              </div>
+            </div>
+          } @else {
+            <div class="ai-empty">
+              <i class="fa-solid fa-microchip"></i>
+              <p>Aucune analyse n'a encore été effectuée pour ce dossier.</p>
+            </div>
+          }
+
+          <button type="button" class="btn btn--ai" disabled>
+            <i class="fa-solid fa-play"></i>
+            Lancer l'analyse
+          </button>
+          <span class="ai-panel__soon">
+            <i class="fa-solid fa-clock"></i>
+            Bientôt disponible — service d'analyse IA en cours de construction
+          </span>
+        </section>
+      </div>
+    </div>
+  }
+</div>

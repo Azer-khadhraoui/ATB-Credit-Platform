@@ -1,0 +1,90 @@
+<div class="page">
+  <div class="page__header">
+    <div class="page__title">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <div>
+        <h1>Audit Logs</h1>
+        <p>Journal des connexions, créations, modifications et suppressions</p>
+      </div>
+    </div>
+    <div class="page__actions">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          placeholder="Rechercher par utilisateur, description…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+        @if (searchTerm()) {
+          <button type="button" class="search-box__clear" (click)="searchTerm.set('')" title="Effacer">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        }
+      </div>
+
+      <button type="button" class="btn btn--ghost" (click)="loadLogs()" [disabled]="loading()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement du journal…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state state--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else if (logs().length === 0) {
+    <div class="state">
+      <i class="fa-regular fa-folder-open"></i>
+      <span>Aucune entrée dans le journal pour le moment.</span>
+    </div>
+  } @else if (filteredLogs().length === 0) {
+    <div class="state">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>Aucun résultat pour « {{ searchTerm() }} ».</span>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Date / Heure</th>
+            <th>Utilisateur</th>
+            <th>Action</th>
+            <th>Entité</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of filteredLogs(); track log.id) {
+            <tr>
+              <td class="cell-date">{{ log.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <div class="user-cell">
+                  <span class="user-cell__name">{{ log.userFullName ?? log.userId ?? 'Système' }}</span>
+                  @if (log.userFullName) {
+                    <span class="user-cell__matricule">{{ log.userId }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <span class="action-badge" [class]="'action-badge--' + log.action.toLowerCase()">
+                  {{ actionLabel(log.action) }}
+                </span>
+              </td>
+              <td>{{ entityLabel(log.entity) }}</td>
+              <td class="cell-description">{{ log.description }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
