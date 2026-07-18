@@ -108,6 +108,11 @@
       background: #f6f6f8;
       color: var(--muted);
     }
+
+    &.invalid {
+      border-color: var(--atb-red);
+      box-shadow: 0 0 0 3px rgba(200, 19, 79, 0.12);
+    }
   }
 
   textarea {
@@ -119,6 +124,42 @@
     align-self: flex-end;
     font-size: 11px;
     color: var(--muted);
+  }
+}
+
+.field-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--atb-red);
+}
+
+.form-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(200, 19, 79, 0.08);
+  border: 1px solid rgba(200, 19, 79, 0.25);
+  color: var(--atb-red-dark);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  background: #fff;
+  border: 1px solid #ececf0;
+  border-radius: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+
+  i {
+    color: var(--atb-red);
+    font-size: 18px;
   }
 }
 

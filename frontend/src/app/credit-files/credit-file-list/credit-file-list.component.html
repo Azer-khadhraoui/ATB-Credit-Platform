@@ -1,0 +1,104 @@
+<div class="page">
+  <div class="page__header">
+    <div class="page__title">
+      <i class="fa-solid fa-folder-open"></i>
+      <div>
+        <h1>Dossiers de crédit</h1>
+        <p>Consultation et gestion des dossiers de crédit</p>
+      </div>
+    </div>
+    <div class="page__actions">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          placeholder="Rechercher par client, type, objet…"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+        @if (searchTerm()) {
+          <button type="button" class="search-box__clear" (click)="searchTerm.set('')" title="Effacer">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        }
+      </div>
+
+      <button type="button" class="btn btn--ghost" (click)="loadCreditFiles()" [disabled]="loading()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Actualiser
+      </button>
+
+      <a routerLink="/app/credit-files/new" class="btn btn--primary">
+        <i class="fa-solid fa-plus"></i>
+        Ajouter un dossier
+      </a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement des dossiers…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state state--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else if (creditFiles().length === 0) {
+    <div class="state">
+      <i class="fa-regular fa-folder-open"></i>
+      <span>Aucun dossier de crédit pour le moment.</span>
+    </div>
+  } @else if (filteredCreditFiles().length === 0) {
+    <div class="state">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>Aucun résultat pour « {{ searchTerm() }} ».</span>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="credit-files-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Type de crédit</th>
+            <th>Montant (TND)</th>
+            <th>Durée</th>
+            <th>Statut</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (creditFile of filteredCreditFiles(); track creditFile.id) {
+            <tr>
+              <td>
+                <div class="client-cell">
+                  <span class="client-cell__name">{{ creditFile.clientFullName ?? '—' }}</span>
+                  <span class="client-cell__cin">{{ creditFile.clientCin }}</span>
+                </div>
+              </td>
+              <td>{{ creditFile.creditType }}</td>
+              <td>{{ creditFile.loanAmount | number: '1.0-0' }}</td>
+              <td>{{ creditFile.loanDurationMonths }} mois</td>
+              <td>
+                <span class="status-badge" [class]="'status-badge--' + creditFile.status.toLowerCase()">
+                  {{ statusLabel(creditFile.status) }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <div class="action-group">
+                  <button type="button" class="icon-action" (click)="editCreditFile(creditFile)" title="Modifier">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button type="button" class="icon-action icon-action--danger" (click)="deleteCreditFile(creditFile)" title="Supprimer">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

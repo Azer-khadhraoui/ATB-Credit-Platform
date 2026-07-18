@@ -1,190 +1,192 @@
 <div class="page">
   <div class="page__header">
     <i class="fa-solid fa-folder-open"></i>
-    <h1>Ajouter un dossier de crédit</h1>
+    <h1>{{ pageTitle() }}</h1>
   </div>
 
-  <form class="form-card" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <section class="section">
-      <div class="section__title">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>Informations générales</span>
-      </div>
-
-      <div class="grid grid--4">
-        <div class="field">
-          <label for="reference">Référence dossier *</label>
-          <input id="reference" type="text" formControlName="reference" placeholder="Ex : DOS-2024-0001" />
-        </div>
-
-        <div class="field">
-          <label for="clientId">Client *</label>
-          <select id="clientId" formControlName="clientId">
-            <option value="" disabled selected>Sélectionner client</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="creditType">Type de crédit *</label>
-          <select id="creditType" formControlName="creditType">
-            <option value="" disabled selected>Sélectionner type</option>
-            <option *ngFor="let type of creditTypes" [value]="type">{{ type }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="loanAmount">Montant demandé (TND) *</label>
-          <div class="input-icon">
-            <input id="loanAmount" type="number" formControlName="loanAmount" placeholder="Entrez le montant" />
-            <i class="fa-regular fa-file-lines"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid--3">
-        <div class="field">
-          <label for="loanDurationMonths">Durée demandée (mois) *</label>
-          <input id="loanDurationMonths" type="number" formControlName="loanDurationMonths" placeholder="Entrez la durée" />
-        </div>
-
-        <div class="field">
-          <label for="loanPurpose">Objet du crédit *</label>
-          <input id="loanPurpose" type="text" formControlName="loanPurpose" placeholder="Entrez l'objet du crédit" />
-        </div>
-
-        <div class="field">
-          <label for="requestDate">Date de demande *</label>
-          <div class="input-icon">
-            <input id="requestDate" type="date" formControlName="requestDate" />
-            <i class="fa-regular fa-calendar"></i>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section__title">
-        <i class="fa-solid fa-chart-line"></i>
-        <span>Situation financière</span>
-      </div>
-
-      <div class="grid grid--4">
-        <div class="field">
-          <label for="monthlyIncome">Revenu mensuel (TND) *</label>
-          <div class="input-icon">
-            <input id="monthlyIncome" type="number" formControlName="monthlyIncome" placeholder="Entrez le revenu" />
-            <i class="fa-regular fa-file-lines"></i>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="monthlyExpenses">Charges mensuelles (TND)</label>
-          <div class="input-icon">
-            <input id="monthlyExpenses" type="number" formControlName="monthlyExpenses" placeholder="Entrez les charges" />
-            <i class="fa-regular fa-file-lines"></i>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="otherCommitments">Autres engagements (TND)</label>
-          <div class="input-icon">
-            <input id="otherCommitments" type="number" formControlName="otherCommitments" placeholder="Entrez le montant" />
-            <i class="fa-regular fa-file-lines"></i>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="resteAVivre">Reste à vivre (TND)</label>
-          <input id="resteAVivre" type="text" [value]="resteAVivre ?? 'Automatique'" disabled />
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section__title">
-        <i class="fa-solid fa-shield-halved"></i>
-        <span>Garanties</span>
-      </div>
-
-      <div class="grid grid--3">
-        <div class="field">
-          <label for="guaranteeType">Type de garantie</label>
-          <select id="guaranteeType" formControlName="guaranteeType">
-            <option value="" disabled selected>Sélectionner</option>
-            <option *ngFor="let type of guaranteeTypes" [value]="type">{{ type }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="guaranteeDescription">Description de la garantie</label>
-          <input id="guaranteeDescription" type="text" formControlName="guaranteeDescription" placeholder="Entrez la description" />
-        </div>
-
-        <div class="field">
-          <label for="guaranteeValue">Valeur de la garantie (TND)</label>
-          <div class="input-icon">
-            <input id="guaranteeValue" type="number" formControlName="guaranteeValue" placeholder="Entrez la valeur" />
-            <i class="fa-regular fa-file-lines"></i>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section__title">
-        <i class="fa-solid fa-chart-pie"></i>
-        <span>Analyse et décision</span>
-      </div>
-
-      <div class="grid grid--4">
-        <div class="field">
-          <label for="riskScore">Score de risque (IA)</label>
-          <input id="riskScore" type="text" value="En attente d'analyse" disabled />
-        </div>
-
-        <div class="field">
-          <label for="riskLevel">Niveau de risque</label>
-          <input id="riskLevel" type="text" value="En attente" disabled />
-        </div>
-
-        <div class="field">
-          <label for="agentDecision">Avis de l'agent</label>
-          <select id="agentDecision" formControlName="agentDecision">
-            <option value="" disabled selected>Sélectionner</option>
-            <option *ngFor="let decision of agentDecisions" [value]="decision">{{ decision }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="status">Statut du dossier</label>
-          <select id="status" formControlName="status">
-            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field field--full">
-        <label for="comments">Commentaires</label>
-        <textarea
-          id="comments"
-          formControlName="comments"
-          rows="3"
-          maxlength="500"
-          placeholder="Entrez un commentaire (optionnel)"
-        ></textarea>
-        <span class="char-count">{{ form.value.comments?.length ?? 0 }} / 500</span>
-      </div>
-    </section>
-
-    <div class="form-actions">
-      <button type="button" class="btn btn--ghost" routerLink="/app/credit-files">
-        <i class="fa-solid fa-xmark"></i>
-        Annuler
-      </button>
-      <button type="submit" class="btn btn--primary">
-        <i class="fa-regular fa-floppy-disk"></i>
-        Enregistrer
-      </button>
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement…</span>
     </div>
-  </form>
+  } @else {
+    <form class="form-card" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <section class="section">
+        <div class="section__title">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Informations générales</span>
+        </div>
+
+        <div class="grid grid--4">
+          <div class="field">
+            <label for="clientId">Client *</label>
+            <select id="clientId" formControlName="clientId" [class.invalid]="isInvalid('clientId')">
+              <option value="" disabled selected>Sélectionner un client</option>
+              <option *ngFor="let client of clients()" [value]="client.id">
+                {{ client.firstName }} {{ client.lastName }} — {{ client.cin }}
+              </option>
+            </select>
+            @if (isInvalid('clientId')) {
+              <span class="field-error">Le client est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="creditType">Type de crédit *</label>
+            <select id="creditType" formControlName="creditType" [class.invalid]="isInvalid('creditType')">
+              <option value="" disabled selected>Sélectionner type</option>
+              <option *ngFor="let type of creditTypes" [value]="type">{{ type }}</option>
+            </select>
+            @if (isInvalid('creditType')) {
+              <span class="field-error">Le type de crédit est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="loanAmount">Montant demandé (TND) *</label>
+            <div class="input-icon">
+              <input id="loanAmount" type="number" formControlName="loanAmount" placeholder="Entrez le montant" [class.invalid]="isInvalid('loanAmount')" />
+              <i class="fa-regular fa-file-lines"></i>
+            </div>
+            @if (isInvalid('loanAmount')) {
+              <span class="field-error">Le montant est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="loanDurationMonths">Durée demandée (mois) *</label>
+            <input id="loanDurationMonths" type="number" formControlName="loanDurationMonths" placeholder="Entrez la durée" [class.invalid]="isInvalid('loanDurationMonths')" />
+            @if (isInvalid('loanDurationMonths')) {
+              <span class="field-error">La durée est requise (min. 1 mois).</span>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="field field--full">
+            <label for="loanPurpose">Objet du crédit *</label>
+            <input id="loanPurpose" type="text" formControlName="loanPurpose" placeholder="Entrez l'objet du crédit" [class.invalid]="isInvalid('loanPurpose')" />
+            @if (isInvalid('loanPurpose')) {
+              <span class="field-error">L'objet du crédit est requis.</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section__title">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Modalités du prêt</span>
+        </div>
+
+        <div class="grid grid--4">
+          <div class="field">
+            <label for="interestRate">Taux d'intérêt (%)</label>
+            <input id="interestRate" type="number" step="0.01" formControlName="interestRate" placeholder="Ex : 7.5" />
+          </div>
+
+          <div class="field">
+            <label for="downPayment">Apport initial (TND)</label>
+            <div class="input-icon">
+              <input id="downPayment" type="number" formControlName="downPayment" placeholder="Entrez l'apport" />
+              <i class="fa-regular fa-file-lines"></i>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="existingCredits">Crédits en cours</label>
+            <input id="existingCredits" type="number" formControlName="existingCredits" placeholder="Nombre de crédits" />
+          </div>
+
+          <div class="field">
+            <label for="monthlyInstallment">Mensualité estimée (TND)</label>
+            <div class="input-icon">
+              <input id="monthlyInstallment" type="number" formControlName="monthlyInstallment" placeholder="Entrez la mensualité" />
+              <i class="fa-regular fa-file-lines"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section__title">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Garanties et historique</span>
+        </div>
+
+        <div class="grid grid--3">
+          <div class="field">
+            <label for="guaranteeType">Type de garantie</label>
+            <select id="guaranteeType" formControlName="guaranteeType">
+              <option value="" disabled selected>Sélectionner</option>
+              <option *ngFor="let type of guaranteeTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+
+          <div class="field field--full">
+            <label for="creditHistory">Historique de crédit</label>
+            <input id="creditHistory" type="text" formControlName="creditHistory" placeholder="Ex : aucun incident, retards ponctuels…" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section__title">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Analyse et décision</span>
+        </div>
+
+        <div class="grid grid--4">
+          <div class="field">
+            <label for="riskScore">Score de risque (IA)</label>
+            <input id="riskScore" type="text" value="En attente d'analyse" disabled />
+          </div>
+
+          <div class="field">
+            <label for="riskLevel">Niveau de risque</label>
+            <input id="riskLevel" type="text" value="En attente" disabled />
+          </div>
+
+          <div class="field">
+            <label for="agentDecision">Avis de l'agent</label>
+            <input id="agentDecision" type="text" formControlName="agentDecision" placeholder="Ex : favorable, réservé…" />
+          </div>
+
+          <div class="field">
+            <label for="status">Statut du dossier</label>
+            <select id="status" formControlName="status">
+              <option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field field--full">
+          <label for="comments">Commentaires</label>
+          <textarea
+            id="comments"
+            formControlName="comments"
+            rows="3"
+            maxlength="500"
+            placeholder="Entrez un commentaire (optionnel)"
+          ></textarea>
+          <span class="char-count">{{ form.value.comments?.length ?? 0 }} / 500</span>
+        </div>
+      </section>
+
+      @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn--ghost" routerLink="/app/credit-files">
+          <i class="fa-solid fa-xmark"></i>
+          Annuler
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          <i class="fa-regular fa-floppy-disk"></i>
+          {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  }
 </div>
