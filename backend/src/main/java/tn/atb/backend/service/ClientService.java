@@ -6,6 +6,7 @@ import tn.atb.backend.dto.client.ClientCreateRequest;
 import tn.atb.backend.dto.client.ClientResponse;
 import tn.atb.backend.dto.client.ClientUpdateRequest;
 import tn.atb.backend.entity.Client;
+import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.exception.DuplicateResourceException;
 import tn.atb.backend.exception.ResourceNotFoundException;
 import tn.atb.backend.mapper.ClientMapper;
@@ -20,6 +21,7 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
+    private final AuditLogService auditLogService;
 
     public ClientResponse createClient(ClientCreateRequest request) {
         if (clientRepository.existsByCin(request.getCin())) {
@@ -47,6 +49,10 @@ public class ClientService {
                 .build();
 
         Client saved = clientRepository.save(client);
+
+        auditLogService.log(AuditAction.CREATE, "Client", saved.getId(),
+                "Création du client " + saved.getFirstName() + " " + saved.getLastName());
+
         return clientMapper.toResponse(saved);
     }
 
@@ -81,12 +87,19 @@ public class ClientService {
         client.setUpdatedAt(LocalDateTime.now());
 
         Client saved = clientRepository.save(client);
+
+        auditLogService.log(AuditAction.UPDATE, "Client", saved.getId(),
+                "Modification du client " + saved.getFirstName() + " " + saved.getLastName());
+
         return clientMapper.toResponse(saved);
     }
 
     public void deleteClient(String id) {
         Client client = findClientOrThrow(id);
+        String fullName = client.getFirstName() + " " + client.getLastName();
         clientRepository.delete(client);
+
+        auditLogService.log(AuditAction.DELETE, "Client", id, "Suppression du client " + fullName);
     }
 
     private Client findClientOrThrow(String id) {

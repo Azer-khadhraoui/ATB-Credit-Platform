@@ -8,6 +8,7 @@ import tn.atb.backend.dto.creditfile.CreditFileResponse;
 import tn.atb.backend.dto.creditfile.CreditFileUpdateRequest;
 import tn.atb.backend.entity.Client;
 import tn.atb.backend.entity.CreditFile;
+import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.entity.enums.CreditStatus;
 import tn.atb.backend.exception.ResourceNotFoundException;
 import tn.atb.backend.mapper.CreditFileMapper;
@@ -26,6 +27,7 @@ public class CreditFileService {
     private final CreditFileRepository creditFileRepository;
     private final ClientRepository clientRepository;
     private final CreditFileMapper creditFileMapper;
+    private final AuditLogService auditLogService;
 
     public CreditFileResponse createCreditFile(CreditFileCreateRequest request) {
         Client client = clientRepository.findById(request.getClientId())
@@ -52,6 +54,10 @@ public class CreditFileService {
                 .build();
 
         CreditFile saved = creditFileRepository.save(creditFile);
+
+        auditLogService.log(AuditAction.CREATE, "CreditFile", saved.getId(),
+                "Création du dossier de crédit pour " + client.getFirstName() + " " + client.getLastName());
+
         return creditFileMapper.toResponse(saved, client);
     }
 
@@ -96,12 +102,18 @@ public class CreditFileService {
 
         CreditFile saved = creditFileRepository.save(creditFile);
         Client client = clientRepository.findById(saved.getClientId()).orElse(null);
+
+        auditLogService.log(AuditAction.UPDATE, "CreditFile", saved.getId(),
+                "Modification du dossier de crédit" + (client != null ? " de " + client.getFirstName() + " " + client.getLastName() : ""));
+
         return creditFileMapper.toResponse(saved, client);
     }
 
     public void deleteCreditFile(String id) {
         CreditFile creditFile = findCreditFileOrThrow(id);
         creditFileRepository.delete(creditFile);
+
+        auditLogService.log(AuditAction.DELETE, "CreditFile", id, "Suppression du dossier de crédit");
     }
 
     private CreditFile findCreditFileOrThrow(String id) {

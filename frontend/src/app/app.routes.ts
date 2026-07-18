@@ -9,6 +9,7 @@ import { ClientsComponent } from './clients/clients.component';
 import { ClientFormComponent } from './clients/client-form/client-form.component';
 import { CreditFileListComponent } from './credit-files/credit-file-list/credit-file-list.component';
 import { CreditFileFormComponent } from './credit-files/credit-file-form/credit-file-form.component';
+import { CreditFileDetailComponent } from './credit-files/credit-file-detail/credit-file-detail.component';
 import { AuditComponent } from './audit/audit.component';
 import { SettingsComponent } from './shared/settings/settings.component';
 import { authGuard } from './core/auth/auth.guard';
@@ -33,6 +34,7 @@ export const routes: Routes = [
       { path: 'credit-files', component: CreditFileListComponent, data: { visualImage: '/images/imagecrud1.png' } },
       { path: 'credit-files/new', component: CreditFileFormComponent, data: { visualImage: '/images/imagecrud1.png' } },
       { path: 'credit-files/:id/edit', component: CreditFileFormComponent, data: { visualImage: '/images/imagecrud1.png' } },
+      { path: 'credit-files/:id', component: CreditFileDetailComponent, data: { visualImage: '/images/imagecrud1.png' } },
       {
         path: 'audit',
         component: AuditComponent,

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import tn.atb.backend.dto.auth.AuthResponse;
 import tn.atb.backend.dto.auth.LoginRequest;
 import tn.atb.backend.entity.User;
+import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.exception.ResourceNotFoundException;
 import tn.atb.backend.repository.UserRepository;
 import tn.atb.backend.security.JwtService;
@@ -20,6 +21,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final AuditLogService auditLogService;
 
     public AuthResponse login(LoginRequest request) {
         // Throws BadCredentialsException (handled globally -> 401) when the matricule/password pair is wrong.
@@ -34,6 +36,9 @@ public class AuthService {
                 "role", user.getRole().name(),
                 "fullName", fullName
         ));
+
+        auditLogService.log(user.getMatricule(), AuditAction.LOGIN, "User", user.getId(),
+                fullName + " s'est connecté(e)");
 
         return AuthResponse.builder()
                 .token(token)
