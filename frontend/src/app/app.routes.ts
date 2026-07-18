@@ -41,7 +41,7 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         data: { visualImage: '/images/imagelogs.png' }
       },
-      { path: 'settings', component: SettingsComponent }
+      { path: 'settings', component: SettingsComponent, data: { visualImage: '/images/parametresimage.png' } }
     ]
   }
 ];
