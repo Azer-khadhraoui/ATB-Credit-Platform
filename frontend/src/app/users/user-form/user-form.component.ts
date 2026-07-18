@@ -88,7 +88,7 @@ export class UserFormComponent {
         const cacheBusted = user.photoUrl ? `${user.photoUrl}?t=${Date.now()}` : null;
         this.photoUrl.set(resolvePhotoUrl(cacheBusted));
         // Keep the topbar in sync if the edited user is the one logged in.
-        this.authService.updateCurrentUserPhoto(this.matricule(), cacheBusted);
+        this.authService.updateCurrentSession(this.userId, { photoUrl: cacheBusted });
         input.value = '';
       },
       error: (err) => {
@@ -146,7 +146,10 @@ export class UserFormComponent {
         ...(password ? { password } : {})
       })
       .subscribe({
-        next: () => this.router.navigate(['/app/users']),
+        next: (user) => {
+          this.authService.updateCurrentSession(this.userId, { fullName: `${user.firstName} ${user.lastName}` });
+          this.router.navigate(['/app/users']);
+        },
         error: (err) => {
           this.saving.set(false);
           this.errorMessage.set(err?.error?.message ?? "La modification a échoué.");
