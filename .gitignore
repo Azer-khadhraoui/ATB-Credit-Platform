@@ -1,0 +1,6 @@
+# Secrets — never commit real values, only .env.example
+.env
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
