@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CreditFileService } from '../credit-file.service';
-import { CreditFile, riskLevelLabel, statusLabel } from '../credit-file.model';
+import { CreditFile, aiDecisionLabel, riskLevelLabel, statusLabel } from '../credit-file.model';
 
 @Component({
   selector: 'app-credit-file-detail',
@@ -20,6 +20,8 @@ export class CreditFileDetailComponent {
   readonly creditFile = signal<CreditFile | null>(null);
   readonly loading = signal(true);
   readonly errorMessage = signal<string | null>(null);
+  readonly analyzing = signal(false);
+  readonly analyzeError = signal<string | null>(null);
 
   constructor() {
     this.creditFileService.getById(this.creditFileId).subscribe({
@@ -42,7 +44,27 @@ export class CreditFileDetailComponent {
     return riskLevelLabel(value);
   }
 
+  aiDecisionLabel(value: CreditFile['aiDecision']): string | null {
+    return aiDecisionLabel(value);
+  }
+
   hasAnalysis(cf: CreditFile): boolean {
     return cf.riskScore != null || cf.riskLevel != null || cf.aiDecision != null;
+  }
+
+  runAnalysis(): void {
+    this.analyzing.set(true);
+    this.analyzeError.set(null);
+
+    this.creditFileService.analyze(this.creditFileId).subscribe({
+      next: (updated) => {
+        this.creditFile.set(updated);
+        this.analyzing.set(false);
+      },
+      error: (err) => {
+        this.analyzing.set(false);
+        this.analyzeError.set(err?.error?.message ?? "L'analyse a échoué.");
+      }
+    });
   }
 }

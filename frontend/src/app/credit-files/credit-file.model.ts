@@ -58,3 +58,13 @@ const RISK_LABELS: Record<RiskLevel, string> = {
 export function riskLevelLabel(value?: RiskLevel | null): string | null {
   return value ? RISK_LABELS[value] : null;
 }
+
+const AI_DECISION_LABELS: Record<AIDecision, string> = {
+  ACCEPTABLE: 'Favorable',
+  RISKY: 'À surveiller',
+  REJECTED: 'Défavorable'
+};
+
+export function aiDecisionLabel(value?: AIDecision | null): string | null {
+  return value ? AI_DECISION_LABELS[value] : null;
+}

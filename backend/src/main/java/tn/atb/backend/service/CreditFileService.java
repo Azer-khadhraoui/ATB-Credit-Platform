@@ -3,13 +3,20 @@ package tn.atb.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import tn.atb.backend.client.MlServiceClient;
 import tn.atb.backend.dto.creditfile.CreditFileCreateRequest;
 import tn.atb.backend.dto.creditfile.CreditFileResponse;
 import tn.atb.backend.dto.creditfile.CreditFileUpdateRequest;
+import tn.atb.backend.dto.ml.MlPredictionRequest;
+import tn.atb.backend.dto.ml.MlPredictionResponse;
 import tn.atb.backend.entity.Client;
 import tn.atb.backend.entity.CreditFile;
+import tn.atb.backend.entity.enums.AIDecision;
 import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.entity.enums.CreditStatus;
+import tn.atb.backend.entity.enums.EmploymentType;
+import tn.atb.backend.entity.enums.MaritalStatus;
+import tn.atb.backend.entity.enums.RiskLevel;
 import tn.atb.backend.exception.ResourceNotFoundException;
 import tn.atb.backend.mapper.CreditFileMapper;
 import tn.atb.backend.repository.ClientRepository;
@@ -28,6 +35,7 @@ public class CreditFileService {
     private final ClientRepository clientRepository;
     private final CreditFileMapper creditFileMapper;
     private final AuditLogService auditLogService;
+    private final MlServiceClient mlServiceClient;
 
     public CreditFileResponse createCreditFile(CreditFileCreateRequest request) {
         Client client = clientRepository.findById(request.getClientId())
@@ -107,6 +115,56 @@ public class CreditFileService {
                 "Modification du dossier de crédit" + (client != null ? " de " + client.getFirstName() + " " + client.getLastName() : ""));
 
         return creditFileMapper.toResponse(saved, client);
+    }
+
+    public CreditFileResponse analyzeCreditFile(String id) {
+        CreditFile creditFile = findCreditFileOrThrow(id);
+        Client client = clientRepository.findById(creditFile.getClientId())
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + creditFile.getClientId()));
+
+        MlPredictionRequest request = buildPredictionRequest(client, creditFile);
+        MlPredictionResponse response = mlServiceClient.predict(request);
+
+        creditFile.setRiskScore(response.getRiskScore());
+        creditFile.setRiskLevel(RiskLevel.valueOf(response.getRiskLevel()));
+        creditFile.setAiDecision(AIDecision.valueOf(response.getAiDecision()));
+        creditFile.setUpdatedAt(LocalDateTime.now());
+
+        CreditFile saved = creditFileRepository.save(creditFile);
+
+        auditLogService.log(AuditAction.ANALYZE_WITH_AI, "CreditFile", saved.getId(),
+                "Analyse IA du dossier de " + client.getFirstName() + " " + client.getLastName()
+                        + " — score " + response.getRiskScore() + ", niveau " + response.getRiskLevel());
+
+        return creditFileMapper.toResponse(saved, client);
+    }
+
+    /**
+     * Maps our domain model to the raw features expected by the FastAPI service (trained on the
+     * public Loan Prediction dataset). Client/CreditFile don't carry every field the dataset has
+     * (dependents, education level, property area, co-applicant income) — these are filled with
+     * reasonable defaults below until the platform captures them explicitly.
+     */
+    private MlPredictionRequest buildPredictionRequest(Client client, CreditFile creditFile) {
+        boolean married = client.getMaritalStatus() == MaritalStatus.MARRIED;
+        boolean selfEmployed = client.getEmploymentType() == EmploymentType.SELF_EMPLOYED;
+
+        int existingCredits = creditFile.getExistingCredits() != null ? creditFile.getExistingCredits() : 0;
+        int creditHistory = existingCredits <= 2 ? 1 : 0;
+
+        return MlPredictionRequest.builder()
+                .gender(client.getGender().name().equals("MALE") ? "Male" : "Female")
+                .married(married ? "Yes" : "No")
+                .dependents(0)
+                .education("Graduate")
+                .selfEmployed(selfEmployed ? "Yes" : "No")
+                .applicantIncome(client.getMonthlyIncome() != null ? client.getMonthlyIncome() : 0)
+                .coapplicantIncome(0)
+                .loanAmount(creditFile.getLoanAmount() != null ? creditFile.getLoanAmount() : 0)
+                .loanAmountTerm(creditFile.getLoanDurationMonths() != null ? creditFile.getLoanDurationMonths() : 0)
+                .creditHistory(creditHistory)
+                .propertyArea("Urban")
+                .build();
     }
 
     public void deleteCreditFile(String id) {

@@ -46,6 +46,11 @@ public class CreditFileController {
         return ResponseEntity.ok(creditFileService.updateCreditFile(id, request));
     }
 
+    @PostMapping("/{id}/analyze")
+    public ResponseEntity<CreditFileResponse> analyzeCreditFile(@PathVariable String id) {
+        return ResponseEntity.ok(creditFileService.analyzeCreditFile(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCreditFile(@PathVariable String id) {
         creditFileService.deleteCreditFile(id);

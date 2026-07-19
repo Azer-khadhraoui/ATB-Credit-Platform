@@ -135,7 +135,7 @@
                 <span class="risk-badge" [class]="'risk-badge--' + (cf.riskLevel ?? '').toLowerCase()">
                   {{ riskLevelLabel(cf.riskLevel) }}
                 </span>
-                <span class="ai-decision">{{ cf.aiDecision }}</span>
+                <span class="ai-decision">{{ aiDecisionLabel(cf.aiDecision) }}</span>
               </div>
             </div>
           } @else {
@@ -145,14 +145,21 @@
             </div>
           }
 
-          <button type="button" class="btn btn--ai" disabled>
-            <i class="fa-solid fa-play"></i>
-            Lancer l'analyse
+          <button type="button" class="btn btn--ai" (click)="runAnalysis()" [disabled]="analyzing()">
+            @if (analyzing()) {
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Analyse en cours…
+            } @else {
+              <i class="fa-solid fa-play"></i>
+              {{ hasAnalysis(cf) ? 'Relancer l\'analyse' : 'Lancer l\'analyse' }}
+            }
           </button>
-          <span class="ai-panel__soon">
-            <i class="fa-solid fa-clock"></i>
-            Bientôt disponible — service d'analyse IA en cours de construction
-          </span>
+          @if (analyzeError()) {
+            <span class="ai-panel__error">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              {{ analyzeError() }}
+            </span>
+          }
         </section>
       </div>
     </div>
