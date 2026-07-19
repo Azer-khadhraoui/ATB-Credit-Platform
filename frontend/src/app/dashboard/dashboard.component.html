@@ -1,7 +1,7 @@
 <div class="page">
   <div class="page__header">
     <div>
-      <h1>Bonjour{{ firstName() ? ', ' + firstName() : '' }} 👋</h1>
+      <h1>Bonjour{{ firstName() ? ', ' + firstName() : '' }}</h1>
       <p>Voici un aperçu de l'activité de la plateforme.</p>
     </div>
   </div>
@@ -51,6 +51,22 @@
           <span class="stat-card__label">Taux d'approbation</span>
         </div>
       </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--rose"><i class="fa-solid fa-coins"></i></div>
+        <div class="stat-card__body">
+          <span class="stat-card__value">{{ s.totalLoanAmount | number: '1.0-0' }}</span>
+          <span class="stat-card__label">Volume total demandé (TND)</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue"><i class="fa-solid fa-gauge"></i></div>
+        <div class="stat-card__body">
+          <span class="stat-card__value">{{ s.analyzedCount > 0 ? s.averageRiskScore : '—' }}</span>
+          <span class="stat-card__label">Score de risque moyen</span>
+        </div>
+      </div>
     </div>
 
     <!-- Charts -->
@@ -92,6 +108,28 @@
                   <span class="dot" [class]="bar.colorClass"></span>
                   {{ bar.label }}
                 </span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill" [class]="bar.colorClass" [style.width.%]="bar.width"></div>
+                </div>
+                <span class="bar-row__value">{{ bar.count }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <div class="card__header">
+          <h2>Répartition par type de crédit</h2>
+          <span class="card__hint">{{ s.totalCreditFiles }} dossiers</span>
+        </div>
+        @if (s.totalCreditFiles === 0) {
+          <p class="empty">Aucun dossier pour le moment.</p>
+        } @else {
+          <div class="bars">
+            @for (bar of typeBars(); track bar.key) {
+              <div class="bar-row">
+                <span class="bar-row__label">{{ bar.label }}</span>
                 <div class="bar-row__track">
                   <div class="bar-row__fill" [class]="bar.colorClass" [style.width.%]="bar.width"></div>
                 </div>

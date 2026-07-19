@@ -18,8 +18,12 @@ export interface DashboardStats {
   totalCreditFiles: number;
   totalUsers: number;
   analyzedCount: number;
+  totalLoanAmount: number;
+  averageRiskScore: number;
+  pendingCount: number;
   statusDistribution: Record<string, number>;
   riskLevelDistribution: Record<string, number>;
+  creditTypeDistribution: Record<string, number>;
   recentCreditFiles: RecentCreditFile[];
 }
 
