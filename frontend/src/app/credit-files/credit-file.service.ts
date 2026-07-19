@@ -47,4 +47,8 @@ export class CreditFileService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  analyze(id: string): Observable<CreditFile> {
+    return this.http.post<CreditFile>(`${this.baseUrl}/${id}/analyze`, {});
+  }
 }
