@@ -3,6 +3,8 @@ __pycache__/
 .venv/
 venv/
 .env
-models/*.pkl
-models/*.joblib
 data/processed/
+
+# The trained model artifacts under models/ ARE versioned on purpose: they are a
+# few KB and the service cannot start without them (Docker build, CI, fresh clone).
+
