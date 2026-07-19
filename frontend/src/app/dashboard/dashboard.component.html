@@ -1,0 +1,137 @@
+<div class="page">
+  <div class="page__header">
+    <div>
+      <h1>Bonjour{{ firstName() ? ', ' + firstName() : '' }} 👋</h1>
+      <p>Voici un aperçu de l'activité de la plateforme.</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Chargement des statistiques…</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state state--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  } @else if (stats()) {
+    @let s = stats()!;
+    <!-- Stat tiles -->
+    <div class="stat-grid">
+      <a routerLink="/app/clients" class="stat-card">
+        <div class="stat-card__icon stat-card__icon--rose"><i class="fa-solid fa-id-card"></i></div>
+        <div class="stat-card__body">
+          <span class="stat-card__value">{{ s.totalClients }}</span>
+          <span class="stat-card__label">Clients</span>
+        </div>
+      </a>
+
+      <a routerLink="/app/credit-files" class="stat-card">
+        <div class="stat-card__icon stat-card__icon--violet"><i class="fa-solid fa-folder-open"></i></div>
+        <div class="stat-card__body">
+          <span class="stat-card__value">{{ s.totalCreditFiles }}</span>
+          <span class="stat-card__label">Dossiers de crédit</span>
+        </div>
+      </a>
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <div class="stat-card__body">
+          <span class="stat-card__value">{{ s.analyzedCount }}</span>
+          <span class="stat-card__label">Dossiers analysés (IA)</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-card__body">
+          <span class="stat-card__value">{{ approvalRate() }}%</span>
+          <span class="stat-card__label">Taux d'approbation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid">
+      <section class="card">
+        <div class="card__header">
+          <h2>Répartition par statut</h2>
+          <span class="card__hint">{{ s.totalCreditFiles }} dossiers</span>
+        </div>
+        @if (s.totalCreditFiles === 0) {
+          <p class="empty">Aucun dossier pour le moment.</p>
+        } @else {
+          <div class="bars">
+            @for (bar of statusBars(); track bar.key) {
+              <div class="bar-row">
+                <span class="bar-row__label">{{ bar.label }}</span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill" [class]="bar.colorClass" [style.width.%]="bar.width"></div>
+                </div>
+                <span class="bar-row__value">{{ bar.count }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <div class="card__header">
+          <h2>Répartition des risques (IA)</h2>
+          <span class="card__hint">{{ s.analyzedCount }} analysés</span>
+        </div>
+        @if (s.analyzedCount === 0) {
+          <p class="empty">Aucune analyse IA effectuée pour le moment.</p>
+        } @else {
+          <div class="bars">
+            @for (bar of riskBars(); track bar.key) {
+              <div class="bar-row">
+                <span class="bar-row__label">
+                  <span class="dot" [class]="bar.colorClass"></span>
+                  {{ bar.label }}
+                </span>
+                <div class="bar-row__track">
+                  <div class="bar-row__fill" [class]="bar.colorClass" [style.width.%]="bar.width"></div>
+                </div>
+                <span class="bar-row__value">{{ bar.count }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+
+    <!-- Recent activity -->
+    <section class="card">
+      <div class="card__header">
+        <h2>Dossiers récents</h2>
+        <a routerLink="/app/credit-files" class="card__link">Voir tout <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+      @if (s.recentCreditFiles.length === 0) {
+        <p class="empty">Aucun dossier récent.</p>
+      } @else {
+        <div class="recent">
+          @for (file of s.recentCreditFiles; track file.id) {
+            <a [routerLink]="['/app/credit-files', file.id]" class="recent-row">
+              <span class="recent-row__avatar">{{ file.clientFullName.charAt(0) }}</span>
+              <div class="recent-row__main">
+                <span class="recent-row__name">{{ file.clientFullName }}</span>
+                <span class="recent-row__meta">{{ file.creditType }} · {{ file.loanAmount | number: '1.0-0' }} TND</span>
+              </div>
+              @if (file.riskLevel) {
+                <span class="risk-chip" [class]="'risk-chip--' + file.riskLevel.toLowerCase()">
+                  {{ riskLevelLabel(file.riskLevel) }}
+                </span>
+              }
+              <span class="status-chip" [class]="'status-chip--' + (file.status ?? '').toLowerCase()">
+                {{ statusLabel(file.status) }}
+              </span>
+            </a>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

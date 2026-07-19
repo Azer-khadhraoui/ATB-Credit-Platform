@@ -139,6 +139,11 @@ public class CreditFileService {
         return creditFileMapper.toResponse(saved, client);
     }
 
+    // The Loan Prediction dataset expresses LoanAmount in thousands (a value of 128 means 128,000).
+    // Our platform stores the loan amount in raw TND, so we divide by this factor before sending it
+    // to the model, keeping the app and the training data on the same scale.
+    private static final double LOAN_AMOUNT_SCALE = 1000.0;
+
     /**
      * Maps our domain model to the raw features expected by the FastAPI service (trained on the
      * public Loan Prediction dataset). Client/CreditFile don't carry every field the dataset has
@@ -149,8 +154,10 @@ public class CreditFileService {
         boolean married = client.getMaritalStatus() == MaritalStatus.MARRIED;
         boolean selfEmployed = client.getEmploymentType() == EmploymentType.SELF_EMPLOYED;
 
-        int existingCredits = creditFile.getExistingCredits() != null ? creditFile.getExistingCredits() : 0;
-        int creditHistory = existingCredits <= 2 ? 1 : 0;
+        int creditHistory = mapCreditHistory(creditFile.getCreditHistory());
+
+        double loanAmountTnd = creditFile.getLoanAmount() != null ? creditFile.getLoanAmount() : 0;
+        double loanAmountScaled = loanAmountTnd / LOAN_AMOUNT_SCALE;
 
         return MlPredictionRequest.builder()
                 .gender(client.getGender().name().equals("MALE") ? "Male" : "Female")
@@ -160,11 +167,26 @@ public class CreditFileService {
                 .selfEmployed(selfEmployed ? "Yes" : "No")
                 .applicantIncome(client.getMonthlyIncome() != null ? client.getMonthlyIncome() : 0)
                 .coapplicantIncome(0)
-                .loanAmount(creditFile.getLoanAmount() != null ? creditFile.getLoanAmount() : 0)
+                .loanAmount(loanAmountScaled)
                 .loanAmountTerm(creditFile.getLoanDurationMonths() != null ? creditFile.getLoanDurationMonths() : 0)
                 .creditHistory(creditHistory)
                 .propertyArea("Urban")
                 .build();
+    }
+
+    /**
+     * Maps the agent-provided credit history to the dataset's binary Credit_History feature
+     * (1 = meets guidelines / clean record, 0 = otherwise). GOOD/AVERAGE keep the loan eligible;
+     * BAD flags a poor repayment record. Unknown/legacy values default to 1 (benefit of the doubt).
+     */
+    private int mapCreditHistory(String history) {
+        if (history == null) {
+            return 1;
+        }
+        return switch (history) {
+            case "BAD" -> 0;
+            default -> 1; // GOOD, AVERAGE, or legacy free-text
+        };
     }
 
     public void deleteCreditFile(String id) {

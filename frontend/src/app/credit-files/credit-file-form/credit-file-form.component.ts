@@ -3,7 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CreditFileService } from '../credit-file.service';
-import { CREDIT_TYPE_OPTIONS, GUARANTEE_TYPE_OPTIONS, STATUS_OPTIONS } from '../credit-file.model';
+import { CREDIT_TYPE_OPTIONS, GUARANTEE_TYPE_OPTIONS, CREDIT_HISTORY_OPTIONS, STATUS_OPTIONS, RiskLevel, riskLevelLabel } from '../credit-file.model';
 import { ClientService } from '../../clients/client.service';
 import { Client } from '../../clients/client.model';
 
@@ -23,6 +23,7 @@ export class CreditFileFormComponent {
 
   readonly creditTypes = CREDIT_TYPE_OPTIONS;
   readonly guaranteeTypes = GUARANTEE_TYPE_OPTIONS;
+  readonly creditHistories = CREDIT_HISTORY_OPTIONS;
   readonly statuses = STATUS_OPTIONS;
 
   private readonly creditFileId = this.route.snapshot.paramMap.get('id');
@@ -33,6 +34,9 @@ export class CreditFileFormComponent {
   readonly loading = signal(this.isEditMode);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly riskScore = signal<number | null>(null);
+  readonly riskLevel = signal<RiskLevel | null>(null);
+  readonly riskLevelText = computed(() => riskLevelLabel(this.riskLevel()) ?? 'En attente');
 
   form = this.fb.group({
     clientId: ['', [Validators.required]],
@@ -90,6 +94,8 @@ export class CreditFileFormComponent {
           comments: creditFile.comments ?? ''
         });
         this.form.get('clientId')?.disable();
+        this.riskScore.set(creditFile.riskScore ?? null);
+        this.riskLevel.set(creditFile.riskLevel ?? null);
         this.loading.set(false);
       },
       error: (err) => {
