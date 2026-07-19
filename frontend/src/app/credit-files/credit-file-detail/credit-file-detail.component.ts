@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CreditFileService } from '../credit-file.service';
-import { CreditFile, aiDecisionLabel, riskLevelLabel, statusLabel } from '../credit-file.model';
+import { CreditFile, aiDecisionLabel, creditHistoryLabel, riskLevelLabel, statusLabel } from '../credit-file.model';
 
 @Component({
   selector: 'app-credit-file-detail',
@@ -46,6 +46,10 @@ export class CreditFileDetailComponent {
 
   aiDecisionLabel(value: CreditFile['aiDecision']): string | null {
     return aiDecisionLabel(value);
+  }
+
+  creditHistoryLabel(value: CreditFile['creditHistory']): string | null {
+    return creditHistoryLabel(value);
   }
 
   hasAnalysis(cf: CreditFile): boolean {

@@ -37,6 +37,12 @@ export const CREDIT_TYPE_OPTIONS = [
 
 export const GUARANTEE_TYPE_OPTIONS = ['Hypothèque', 'Caution personnelle', 'Nantissement', 'Aucune'];
 
+export const CREDIT_HISTORY_OPTIONS: { value: string; label: string }[] = [
+  { value: 'GOOD', label: 'Bon — aucun incident de paiement' },
+  { value: 'AVERAGE', label: 'Moyen — retards ponctuels' },
+  { value: 'BAD', label: 'Mauvais — incidents majeurs / défauts' }
+];
+
 export const STATUS_OPTIONS: { value: CreditStatus; label: string }[] = [
   { value: 'DRAFT', label: 'Nouveau' },
   { value: 'IN_REVIEW', label: "En cours d'examen" },
@@ -67,4 +73,11 @@ const AI_DECISION_LABELS: Record<AIDecision, string> = {
 
 export function aiDecisionLabel(value?: AIDecision | null): string | null {
   return value ? AI_DECISION_LABELS[value] : null;
+}
+
+export function creditHistoryLabel(value?: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+  return CREDIT_HISTORY_OPTIONS.find((o) => o.value === value)?.label ?? value;
 }

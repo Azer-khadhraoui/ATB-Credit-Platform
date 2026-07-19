@@ -125,7 +125,10 @@
 
           <div class="field field--full">
             <label for="creditHistory">Historique de crédit</label>
-            <input id="creditHistory" type="text" formControlName="creditHistory" placeholder="Ex : aucun incident, retards ponctuels…" />
+            <select id="creditHistory" formControlName="creditHistory">
+              <option value="" disabled selected>Sélectionner</option>
+              <option *ngFor="let h of creditHistories" [value]="h.value">{{ h.label }}</option>
+            </select>
           </div>
         </div>
       </section>
@@ -139,12 +142,12 @@
         <div class="grid grid--4">
           <div class="field">
             <label for="riskScore">Score de risque (IA)</label>
-            <input id="riskScore" type="text" value="En attente d'analyse" disabled />
+            <input id="riskScore" type="text" [value]="riskScore() != null ? riskScore() : 'En attente d\'analyse'" disabled />
           </div>
 
           <div class="field">
             <label for="riskLevel">Niveau de risque</label>
-            <input id="riskLevel" type="text" value="En attente" disabled />
+            <input id="riskLevel" type="text" [value]="riskLevelText()" disabled />
           </div>
 
           <div class="field">
