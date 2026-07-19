@@ -45,8 +45,20 @@ export class DashboardComponent {
     HIGH: 'bar--red'
   };
 
+  // Rotating palette for credit types (categorical — fixed order, never cycled beyond the list).
+  private readonly TYPE_COLORS = ['bar--rose', 'bar--violet', 'bar--blue', 'bar--amber'];
+
   readonly statusBars = computed<BarItem[]>(() => this.buildBars(this.stats()?.statusDistribution, this.STATUS_COLORS, (k) => statusLabel(k as CreditStatus)));
   readonly riskBars = computed<BarItem[]>(() => this.buildBars(this.stats()?.riskLevelDistribution, this.RISK_COLORS, (k) => riskLevelLabel(k as RiskLevel) ?? k));
+  readonly typeBars = computed<BarItem[]>(() => {
+    const dist = this.stats()?.creditTypeDistribution;
+    if (!dist) {
+      return [];
+    }
+    const colorMap: Record<string, string> = {};
+    Object.keys(dist).forEach((key, i) => (colorMap[key] = this.TYPE_COLORS[i % this.TYPE_COLORS.length]));
+    return this.buildBars(dist, colorMap, (k) => k);
+  });
 
   readonly approvalRate = computed(() => {
     const s = this.stats();

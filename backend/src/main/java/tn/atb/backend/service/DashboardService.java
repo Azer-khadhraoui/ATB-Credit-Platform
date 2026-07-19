@@ -103,8 +103,12 @@ public class DashboardService {
                 .totalCreditFiles(creditFiles.size())
                 .totalUsers(userRepository.count())
                 .analyzedCount(analyzedCount)
+                .totalLoanAmount(totalLoanAmount)
+                .averageRiskScore(averageRiskScore)
+                .pendingCount(pendingCount)
                 .statusDistribution(statusDistribution)
                 .riskLevelDistribution(riskLevelDistribution)
+                .creditTypeDistribution(creditTypeDistribution)
                 .recentCreditFiles(recent)
                 .build();
     }

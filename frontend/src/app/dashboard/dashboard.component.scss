@@ -64,8 +64,9 @@
 // ---------------------------------------------------------------------------
 
 .stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -81,6 +82,8 @@
   text-decoration: none;
   box-shadow: 0 6px 18px rgba(43, 12, 26, 0.04);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  flex: 1 1 260px;
+  max-width: calc((100% - 32px) / 3);
 
   &:hover {
     transform: translateY(-2px);
@@ -101,6 +104,7 @@
     &--violet { background: var(--violet-bg); color: var(--violet); }
     &--blue { background: var(--blue-bg); color: var(--blue); }
     &--green { background: var(--green-bg); color: var(--green); }
+    &--amber { background: var(--amber-bg); color: var(--amber); }
   }
 
   &__body {
@@ -244,6 +248,8 @@
 .bar--red { background: linear-gradient(90deg, #e2417a, var(--atb-red)); }
 .bar--blue { background: linear-gradient(90deg, #2f8fd6, #0f5f9c); }
 .bar--slate { background: linear-gradient(90deg, #8a8a95, #55555f); }
+.bar--rose { background: linear-gradient(90deg, #e2417a, var(--atb-red)); }
+.bar--violet { background: linear-gradient(90deg, #a480d9, var(--violet)); }
 
 .dot.bar--green { background: #147a4d; }
 .dot.bar--amber { background: #b8860f; }
@@ -332,6 +338,18 @@
 .status-chip--analyzed { background: var(--blue-bg); color: var(--blue); }
 .status-chip--approved { background: var(--green-bg); color: var(--green); }
 .status-chip--rejected { background: rgba(200, 19, 79, 0.1); color: var(--atb-red-dark); }
+
+@media (max-width: 900px) {
+  .stat-card {
+    max-width: calc((100% - 16px) / 2);
+  }
+}
+
+@media (max-width: 560px) {
+  .stat-card {
+    max-width: 100%;
+  }
+}
 
 @media (max-width: 620px) {
   .bar-row {
