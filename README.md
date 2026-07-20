@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="frontend/public/images/logoatbbackgrouge.jpg" alt="Arab Tunisian Bank" width="140" />
+<img src="frontend/public/images/logoatbicon.webp" alt="Arab Tunisian Bank" width="120" />
 
 # ATB Credit Platform
 
@@ -8,11 +8,16 @@
 
 Projet de stage — Arab Tunisian Bank × ESPRIT
 
+[![CI](https://github.com/Azer-khadhraoui/ATB-Credit-Platform/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![Security](https://github.com/Azer-khadhraoui/ATB-Credit-Platform/actions/workflows/security.yml/badge.svg)](../../actions/workflows/security.yml)
+
 [![Angular](https://img.shields.io/badge/Angular-19-DD0031?logo=angular&logoColor=white)](frontend)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white)](backend)
 [![FastAPI](https://img.shields.io/badge/FastAPI-ML%20Service-009688?logo=fastapi&logoColor=white)](ml-service)
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)](#)
 [![Python](https://img.shields.io/badge/scikit--learn-Model-F7931E?logo=scikitlearn&logoColor=white)](ml-service)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
+[![Trivy](https://img.shields.io/badge/Trivy-Security%20Scan-1904DA?logo=aqua&logoColor=white)](.github/workflows/security.yml)
 
 </div>
 
@@ -26,7 +31,8 @@ Projet de stage — Arab Tunisian Bank × ESPRIT
 - [Modules fonctionnels](#modules-fonctionnels)
 - [Démarrage](#démarrage)
 - [Structure du dépôt](#structure-du-dépôt)
-- [Sécurité](#sécurité)
+- [Sécurité applicative](#sécurité-applicative)
+- [CI/CD & DevSecOps](#cicd--devsecops)
 - [Roadmap](#roadmap)
 
 ## Aperçu
@@ -63,6 +69,8 @@ Le projet suit une architecture **microservices**, avec une séparation claire e
 | Base de données | MongoDB | Utilisateurs, clients, dossiers, résultats IA, audit logs |
 | Service ML | Python, FastAPI, scikit-learn, pandas | Entraînement et exposition du modèle de scoring |
 | Auth | JWT + BCrypt | Authentification stateless, rôles Admin / Agent de crédit |
+| Conteneurisation | Docker, Docker Compose, Nginx | Empaquetage et orchestration des quatre services |
+| DevSecOps | GitHub Actions, Trivy, CodeQL, Gitleaks | Build automatisé et analyse de vulnérabilités |
 
 ## Modules fonctionnels
 
@@ -76,61 +84,99 @@ Le projet suit une architecture **microservices**, avec une séparation claire e
 
 ## Démarrage
 
-Chaque service se lance indépendamment. Trois terminaux sont nécessaires en développement.
+### Avec Docker (recommandé)
 
-### 1. Base de données
-
-MongoDB doit tourner en local sur le port par défaut (`27017`).
-
-### 2. Backend (Spring Boot)
+Une seule commande lance l'ensemble de la plateforme — aucun outil à installer hormis Docker.
 
 ```bash
-cd backend
-./mvnw spring-boot:run
+cp .env.example .env      # ajuster le secret JWT si besoin
+docker compose up --build -d
 ```
 
-L'API est exposée sur `http://localhost:8081`. Configuration dans `backend/src/main/resources/application.properties` (URI MongoDB, secret JWT, URL du service ML).
+| Service | URL |
+|---|---|
+| Application web | http://localhost:4200 |
+| API backend | http://localhost:8081 |
+| Service ML | http://localhost:8000/docs |
 
-### 3. Service ML (FastAPI)
+Commandes utiles :
 
 ```bash
+docker compose ps        # état des conteneurs
+docker compose logs -f    # logs en continu
+docker compose down       # tout arrêter
+```
+
+Le démarrage est ordonné par des *healthchecks* : le backend n'attend pas seulement que MongoDB et le service ML soient lancés, mais qu'ils répondent réellement. Les données MongoDB et les photos de profil sont conservées dans des volumes nommés.
+
+### Sans Docker (développement)
+
+Utile pour déboguer un service isolément. MongoDB doit tourner localement sur le port `27017`.
+
+```bash
+# Backend — http://localhost:8081
+cd backend && ./mvnw spring-boot:run
+
+# Service ML — http://localhost:8000
 cd ml-service
-pip install fastapi "uvicorn[standard]" joblib pydantic pandas scikit-learn
+pip install -r requirements-docker.txt
 uvicorn app.main:app --port 8000
+
+# Frontend — http://localhost:4200
+cd frontend && npm install && npm start
 ```
 
-Expose `POST /predict` et `GET /health` sur `http://localhost:8000`. Le modèle entraîné (`models/model.pkl`) est chargé au démarrage — voir `notebooks/01_train_model.ipynb` pour reproduire l'entraînement.
-
-### 4. Frontend (Angular)
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-Application disponible sur `http://localhost:4200`.
+Le modèle entraîné (`ml-service/models/model.pkl`) est chargé au démarrage du service ML — voir `notebooks/01_train_model.ipynb` pour reproduire l'entraînement.
 
 ## Structure du dépôt
 
 ```
 ATB-Credit-Platform/
-├── frontend/          Application Angular (interface utilisateur)
-├── backend/            API Spring Boot (logique métier, sécurité, persistance)
-├── ml-service/         Service FastAPI (scoring de risque)
-│   ├── app/             Code de l'API (endpoints, chargement du modèle)
+├── docker-compose.yml   Orchestration des quatre services
+├── .env.example         Modèle de configuration (secrets hors dépôt)
+├── .github/workflows/   Pipelines CI et DevSecOps
+├── frontend/            Application Angular + Dockerfile + config Nginx
+├── backend/             API Spring Boot + Dockerfile
+├── ml-service/          Service FastAPI + Dockerfile
+│   ├── app/              Code de l'API (endpoints, chargement du modèle)
 │   ├── data/raw/         Dataset d'entraînement (Loan Prediction)
 │   ├── models/           Modèle entraîné et artefacts (.pkl)
 │   └── notebooks/        Notebook de préparation des données et d'entraînement
-└── docs/               Documentation et maquettes de conception
+└── docs/                Documentation et maquettes de conception
 ```
 
-## Sécurité
+## Sécurité applicative
 
 - Mots de passe hashés avec **BCrypt**, jamais stockés en clair.
 - Authentification **stateless** via **JWT**, vérifié à chaque requête protégée.
 - Autorisations par rôle appliquées **côté backend** (pas seulement dans l'interface) : par exemple, `/api/audit-logs` renvoie `403` pour un compte non-administrateur, indépendamment de ce que montre l'interface.
 - Chaque action sensible (connexion, création, modification, suppression, analyse IA) est tracée dans le journal d'audit avec l'identité de l'auteur.
+- Secrets (secret JWT, base de données) injectés par variables d'environnement, jamais versionnés — seul `.env.example` figure dans le dépôt.
+
+## CI/CD & DevSecOps
+
+Deux workflows GitHub Actions s'exécutent à chaque `push` et `pull request` sur `main`.
+
+**`ci.yml` — build & tests**
+Compile et teste chaque service (Spring Boot avec un conteneur MongoDB, Angular en configuration production, FastAPI avec vérification du chargement du modèle), puis construit les trois images Docker.
+
+**`security.yml` — analyse de sécurité**
+
+| Outil | Portée |
+|---|---|
+| **Gitleaks** | Détection de secrets sur l'intégralité de l'historique Git |
+| **CodeQL** | Analyse statique (SAST) — Java, TypeScript, Python |
+| **Trivy** | Vulnérabilités des dépendances du projet |
+| **Trivy** | Vulnérabilités des trois images Docker |
+
+Les résultats sont publiés au format SARIF dans l'onglet *Security* du dépôt. Une analyse hebdomadaire est également planifiée, de nouvelles vulnérabilités pouvant être publiées contre du code inchangé.
+
+Les scans **rapportent sans bloquer** le pipeline : une CVE transitive sans correctif disponible ne doit pas empêcher la livraison.
+
+**Durcissement des conteneurs**
+- Processus exécutés sous un **utilisateur non-root** dans chaque image
+- **Images de base minimales** (Alpine, slim) pour réduire la surface d'attaque
+- **Builds multi-étapes** : les outils de compilation (Maven, Node) n'apparaissent pas dans les images finales
 
 ## Roadmap
 
@@ -139,7 +185,10 @@ ATB-Credit-Platform/
 - [x] Module Machine Learning (scoring de risque)
 - [x] Journal d'audit
 - [x] Tableau de bord statistique
-- [ ] Conteneurisation Docker des trois services
+- [x] Conteneurisation Docker & orchestration Compose
+- [x] Analyse de vulnérabilités (Trivy, CodeQL, Gitleaks)
+- [x] Pipeline CI/CD (GitHub Actions)
+- [ ] Déploiement Kubernetes
 
 ---
 
