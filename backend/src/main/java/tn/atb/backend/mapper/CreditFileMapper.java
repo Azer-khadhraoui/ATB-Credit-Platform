@@ -32,6 +32,7 @@ public class CreditFileMapper {
                 .aiDecision(creditFile.getAiDecision())
                 .agentDecision(creditFile.getAgentDecision())
                 .comments(creditFile.getComments())
+                .decisionFactors(creditFile.getDecisionFactors())
                 .createdAt(creditFile.getCreatedAt())
                 .updatedAt(creditFile.getUpdatedAt())
                 .build();

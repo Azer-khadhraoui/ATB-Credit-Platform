@@ -13,6 +13,7 @@ import tn.atb.backend.entity.enums.CreditStatus;
 import tn.atb.backend.entity.enums.RiskLevel;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(collection = "credit_files")
 @Getter
@@ -65,6 +66,9 @@ public class CreditFile {
     private String agentDecision;
 
     private String comments;
+
+    /** Why the AI reached its decision — kept so the agent can review it later. */
+    private List<DecisionFactor> decisionFactors;
 
     private LocalDateTime createdAt;
 

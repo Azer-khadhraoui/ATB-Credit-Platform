@@ -11,6 +11,7 @@ import tn.atb.backend.dto.ml.MlPredictionRequest;
 import tn.atb.backend.dto.ml.MlPredictionResponse;
 import tn.atb.backend.entity.Client;
 import tn.atb.backend.entity.CreditFile;
+import tn.atb.backend.entity.DecisionFactor;
 import tn.atb.backend.entity.enums.AIDecision;
 import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.entity.enums.CreditStatus;
@@ -133,6 +134,7 @@ public class CreditFileService {
         creditFile.setRiskScore(response.getRiskScore());
         creditFile.setRiskLevel(RiskLevel.valueOf(response.getRiskLevel()));
         creditFile.setAiDecision(AIDecision.valueOf(response.getAiDecision()));
+        creditFile.setDecisionFactors(toDecisionFactors(response));
         creditFile.setUpdatedAt(LocalDateTime.now());
 
         CreditFile saved = creditFileRepository.save(creditFile);
@@ -142,6 +144,25 @@ public class CreditFileService {
                         + " — score " + response.getRiskScore() + ", niveau " + response.getRiskLevel());
 
         return creditFileMapper.toResponse(saved, client);
+    }
+
+    // Only the factors that carry real weight are kept: the tail is dominated by
+    // near-zero contributions that would add noise to the agent's screen without
+    // telling them anything.
+    private static final int MAX_STORED_FACTORS = 6;
+
+    private List<DecisionFactor> toDecisionFactors(MlPredictionResponse response) {
+        if (response.getFactors() == null) {
+            return List.of();
+        }
+        return response.getFactors().stream()
+                .limit(MAX_STORED_FACTORS)
+                .map(factor -> DecisionFactor.builder()
+                        .feature(factor.getFeature())
+                        .impact(factor.getImpact())
+                        .reducesRisk(factor.isReducesRisk())
+                        .build())
+                .toList();
     }
 
     // The Loan Prediction dataset expresses LoanAmount in thousands (a value of 128 means 128,000).
