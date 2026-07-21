@@ -19,7 +19,7 @@ jobs:
     name: Secret detection (Gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Gitleaks scans the whole history, not just the tip.
 
@@ -43,7 +43,7 @@ jobs:
           - language: python
             build-mode: none
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -61,7 +61,7 @@ jobs:
     name: Dependency vulnerabilities (Trivy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Scan project dependencies
         uses: aquasecurity/trivy-action@v0.36.0
@@ -89,7 +89,7 @@ jobs:
       matrix:
         service: [backend, frontend, ml-service]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build image
         run: docker build -t atb-${{ matrix.service }}:scan ./${{ matrix.service }}
@@ -118,7 +118,7 @@ jobs:
     name: Dynamic scan (OWASP ZAP)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Start the stack
         run: |
