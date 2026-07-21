@@ -7,9 +7,11 @@ import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
+import tn.atb.backend.entity.enums.EducationLevel;
 import tn.atb.backend.entity.enums.EmploymentType;
 import tn.atb.backend.entity.enums.Gender;
 import tn.atb.backend.entity.enums.MaritalStatus;
+import tn.atb.backend.entity.enums.PropertyArea;
 
 import java.time.LocalDate;
 
@@ -36,6 +38,13 @@ public class ClientCreateRequest {
     @NotNull(message = "Marital status is required")
     private MaritalStatus maritalStatus;
 
+    @NotNull(message = "Number of dependents is required")
+    @PositiveOrZero(message = "Number of dependents must be positive")
+    private Integer dependents;
+
+    @NotNull(message = "Education level is required")
+    private EducationLevel educationLevel;
+
     @NotBlank(message = "Phone is required")
     private String phone;
 
@@ -48,6 +57,9 @@ public class ClientCreateRequest {
 
     @NotBlank(message = "City is required")
     private String city;
+
+    @NotNull(message = "Property area is required")
+    private PropertyArea propertyArea;
 
     private String profession;
 
