@@ -8,6 +8,7 @@ export interface CreditFileCreatePayload {
   clientId: string;
   creditType: string;
   loanAmount: number;
+  coapplicantIncome?: number | null;
   loanDurationMonths: number;
   loanPurpose: string;
   interestRate?: number | null;

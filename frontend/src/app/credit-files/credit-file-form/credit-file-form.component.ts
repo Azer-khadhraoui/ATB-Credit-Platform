@@ -42,6 +42,7 @@ export class CreditFileFormComponent {
     clientId: ['', [Validators.required]],
     creditType: ['', [Validators.required]],
     loanAmount: [null as number | null, [Validators.required, Validators.min(0)]],
+    coapplicantIncome: [null as number | null, [Validators.min(0)]],
     loanDurationMonths: [null as number | null, [Validators.required, Validators.min(1)]],
     loanPurpose: ['', [Validators.required]],
 
@@ -81,6 +82,7 @@ export class CreditFileFormComponent {
           clientId: creditFile.clientId,
           creditType: creditFile.creditType,
           loanAmount: creditFile.loanAmount,
+          coapplicantIncome: creditFile.coapplicantIncome ?? null,
           loanDurationMonths: creditFile.loanDurationMonths,
           loanPurpose: creditFile.loanPurpose,
           interestRate: creditFile.interestRate ?? null,
@@ -118,6 +120,7 @@ export class CreditFileFormComponent {
     const payload = {
       creditType: value.creditType!,
       loanAmount: value.loanAmount!,
+      coapplicantIncome: value.coapplicantIncome ?? undefined,
       loanDurationMonths: value.loanDurationMonths!,
       loanPurpose: value.loanPurpose!,
       interestRate: value.interestRate ?? undefined,

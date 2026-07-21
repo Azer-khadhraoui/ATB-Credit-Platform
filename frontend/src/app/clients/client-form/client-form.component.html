@@ -77,6 +77,27 @@
             }
           </div>
         </div>
+
+        <div class="grid grid--3">
+          <div class="field">
+            <label for="dependents">Personnes à charge *</label>
+            <input id="dependents" type="number" min="0" formControlName="dependents" placeholder="Ex : 2" [class.invalid]="isInvalid('dependents')" />
+            @if (isInvalid('dependents')) {
+              <span class="field-error">Le nombre de personnes à charge est requis.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="educationLevel">Niveau d'études *</label>
+            <select id="educationLevel" formControlName="educationLevel" [class.invalid]="isInvalid('educationLevel')">
+              <option value="" disabled selected>Sélectionner</option>
+              <option *ngFor="let e of educationLevels" [value]="e.value">{{ e.label }}</option>
+            </select>
+            @if (isInvalid('educationLevel')) {
+              <span class="field-error">Le niveau d'études est requis.</span>
+            }
+          </div>
+        </div>
       </section>
 
       <section class="section">
@@ -115,6 +136,17 @@
             <input id="city" type="text" formControlName="city" placeholder="Entrez la ville" [class.invalid]="isInvalid('city')" />
             @if (isInvalid('city')) {
               <span class="field-error">La ville est requise.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="propertyArea">Zone d'habitation *</label>
+            <select id="propertyArea" formControlName="propertyArea" [class.invalid]="isInvalid('propertyArea')">
+              <option value="" disabled selected>Sélectionner</option>
+              <option *ngFor="let a of propertyAreas" [value]="a.value">{{ a.label }}</option>
+            </select>
+            @if (isInvalid('propertyArea')) {
+              <span class="field-error">La zone d'habitation est requise.</span>
             }
           </div>
         </div>

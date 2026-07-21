@@ -72,6 +72,10 @@
               <span class="tile__value">{{ cf.downPayment != null ? (cf.downPayment | number: '1.0-0') + ' TND' : '—' }}</span>
             </div>
             <div class="tile">
+              <span class="tile__label">Revenu co-emprunteur</span>
+              <span class="tile__value">{{ cf.coapplicantIncome ? (cf.coapplicantIncome | number: '1.0-0') + ' TND' : '—' }}</span>
+            </div>
+            <div class="tile">
               <span class="tile__label">Crédits en cours</span>
               <span class="tile__value">{{ cf.existingCredits ?? '—' }}</span>
             </div>
