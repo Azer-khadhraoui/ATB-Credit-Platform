@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.14-slim
 WORKDIR /app
 
 # System deps needed to build/scikit-learn wheels are already published for this
