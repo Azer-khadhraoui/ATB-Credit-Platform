@@ -18,6 +18,7 @@ Projet de stage — Arab Tunisian Bank × ESPRIT
 [![Python](https://img.shields.io/badge/scikit--learn-Model-F7931E?logo=scikitlearn&logoColor=white)](ml-service)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
 [![Trivy](https://img.shields.io/badge/Trivy-Security%20Scan-1904DA?logo=aqua&logoColor=white)](.github/workflows/security.yml)
+[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=Azer-khadhraoui_ATB-Credit-Platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Azer-khadhraoui_ATB-Credit-Platform)
 
 </div>
 
@@ -157,17 +158,23 @@ ATB-Credit-Platform/
 
 Deux workflows GitHub Actions s'exécutent à chaque `push` et `pull request` sur `main`.
 
-**`ci.yml` — build & tests**
-Compile et teste chaque service (Spring Boot avec un conteneur MongoDB, Angular en configuration production, FastAPI avec vérification du chargement du modèle), puis construit les trois images Docker.
+**`ci.yml` — build, tests & qualité**
+Compile et teste chaque service (Spring Boot avec un conteneur MongoDB, Angular en configuration production, FastAPI avec vérification du chargement du modèle), lance l'analyse de qualité **SonarCloud**, puis construit les trois images Docker.
 
 **`security.yml` — analyse de sécurité**
 
-| Outil | Portée |
-|---|---|
-| **Gitleaks** | Détection de secrets sur l'intégralité de l'historique Git |
-| **CodeQL** | Analyse statique (SAST) — Java, TypeScript, Python |
-| **Trivy** | Vulnérabilités des dépendances du projet |
-| **Trivy** | Vulnérabilités des trois images Docker |
+| Outil | Type | Portée |
+|---|---|---|
+| **Gitleaks** | Secrets | Détection de secrets sur l'intégralité de l'historique Git |
+| **CodeQL** | SAST | Analyse statique du code — Java, TypeScript, Python |
+| **Trivy** | SCA | Vulnérabilités des dépendances du projet |
+| **Trivy** | Image | Vulnérabilités des trois images Docker |
+| **OWASP ZAP** | DAST | Scan dynamique de l'application **en cours d'exécution** |
+| **SonarCloud** | Qualité | Duplication, complexité, maintenabilité |
+
+L'ensemble couvre les analyses **statiques** (code et images au repos) et **dynamique** (application réellement démarrée via Docker Compose, pour détecter ce que l'analyse statique ne voit pas : en-têtes mal configurés, endpoints exposés, XSS).
+
+**Dependabot** surveille par ailleurs les mises à jour des dépendances Maven, npm, pip, des images de base Docker et des actions GitHub elles-mêmes. Les mises à jour sont regroupées par écosystème pour éviter une avalanche de pull requests.
 
 Les résultats sont publiés au format SARIF dans l'onglet *Security* du dépôt. Une analyse hebdomadaire est également planifiée, de nouvelles vulnérabilités pouvant être publiées contre du code inchangé.
 
@@ -186,7 +193,9 @@ Les scans **rapportent sans bloquer** le pipeline : une CVE transitive sans corr
 - [x] Journal d'audit
 - [x] Tableau de bord statistique
 - [x] Conteneurisation Docker & orchestration Compose
-- [x] Analyse de vulnérabilités (Trivy, CodeQL, Gitleaks)
+- [x] Analyse de vulnérabilités — SAST, SCA, images, secrets (CodeQL, Trivy, Gitleaks)
+- [x] Analyse dynamique (OWASP ZAP) & qualité de code (SonarCloud)
+- [x] Veille automatisée des dépendances (Dependabot)
 - [x] Pipeline CI/CD (GitHub Actions)
 - [ ] Déploiement Kubernetes
 
