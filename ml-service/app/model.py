@@ -31,6 +31,36 @@ class ModelService:
         self.feature_columns = joblib.load(MODELS_DIR / "feature_columns.pkl")
         self.model_name = type(self.model).__name__
 
+        # Training-set averages, used to express each feature's contribution as a
+        # deviation from a typical applicant. Optional: an explanation is a bonus,
+        # never a reason to fail a prediction.
+        means_path = MODELS_DIR / "feature_means.pkl"
+        self.feature_means = joblib.load(means_path) if means_path.exists() else None
+
+    def _explain(self, df: pd.DataFrame) -> list[dict]:
+        """Attributes the decision across features, strongest influence first.
+
+        Only linear models expose per-feature coefficients this directly; for anything
+        else we return nothing rather than inventing an explanation.
+        """
+        if self.feature_means is None or not hasattr(self.model, "coef_"):
+            return []
+
+        coefficients = self.model.coef_[0]
+        row = df.iloc[0]
+
+        factors = []
+        for column, coefficient in zip(self.feature_columns, coefficients):
+            impact = float(coefficient * (row[column] - self.feature_means[column]))
+            factors.append({
+                "feature": column,
+                "impact": round(impact, 4),
+                "reduces_risk": impact > 0,
+            })
+
+        factors.sort(key=lambda f: abs(f["impact"]), reverse=True)
+        return factors
+
     def predict(self, request: LoanPredictionRequest) -> dict:
         row = {
             RAW_TO_TRAINING_COLUMNS[field]: value
@@ -68,6 +98,7 @@ class ModelService:
             "risk_level": risk_level,
             "ai_decision": ai_decision,
             "model_name": self.model_name,
+            "factors": self._explain(df),
         }
 
 

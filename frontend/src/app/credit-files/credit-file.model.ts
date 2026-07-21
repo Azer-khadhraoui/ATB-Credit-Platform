@@ -1,3 +1,10 @@
+export interface DecisionFactor {
+  /** The model's own column name — mapped to readable wording by decisionFactorLabel(). */
+  feature: string;
+  impact: number;
+  reducesRisk: boolean;
+}
+
 export type CreditStatus = 'DRAFT' | 'IN_REVIEW' | 'ANALYZED' | 'APPROVED' | 'REJECTED';
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 export type AIDecision = 'ACCEPTABLE' | 'RISKY' | 'REJECTED';
