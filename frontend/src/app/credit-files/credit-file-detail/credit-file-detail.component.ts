@@ -2,7 +2,21 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CreditFileService } from '../credit-file.service';
-import { CreditFile, aiDecisionLabel, creditHistoryLabel, riskLevelLabel, statusLabel } from '../credit-file.model';
+import {
+  CreditFile,
+  DecisionFactor,
+  aiDecisionLabel,
+  creditHistoryLabel,
+  decisionFactorLabel,
+  riskLevelLabel,
+  statusLabel
+} from '../credit-file.model';
+
+/** A factor plus the bar width used to draw it, relative to the strongest one. */
+interface WeightedFactor extends DecisionFactor {
+  label: string;
+  width: number;
+}
 
 @Component({
   selector: 'app-credit-file-detail',
@@ -50,6 +64,24 @@ export class CreditFileDetailComponent {
 
   creditHistoryLabel(value: CreditFile['creditHistory']): string | null {
     return creditHistoryLabel(value);
+  }
+
+  /**
+   * Scales each bar against the strongest factor, so the dominant driver fills the
+   * width and the rest read as fractions of it. Absolute log-odds mean nothing to an
+   * agent; relative weight does.
+   */
+  weightedFactors(cf: CreditFile): WeightedFactor[] {
+    const factors = cf.decisionFactors ?? [];
+    if (factors.length === 0) {
+      return [];
+    }
+    const strongest = Math.max(...factors.map((f) => Math.abs(f.impact)));
+    return factors.map((f) => ({
+      ...f,
+      label: decisionFactorLabel(f.feature),
+      width: strongest === 0 ? 0 : Math.round((Math.abs(f.impact) / strongest) * 100)
+    }));
   }
 
   hasAnalysis(cf: CreditFile): boolean {

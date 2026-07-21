@@ -32,6 +32,7 @@ export interface CreditFile {
   aiDecision?: AIDecision | null;
   agentDecision?: string | null;
   comments?: string | null;
+  decisionFactors?: DecisionFactor[] | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,6 +82,25 @@ const AI_DECISION_LABELS: Record<AIDecision, string> = {
 
 export function aiDecisionLabel(value?: AIDecision | null): string | null {
   return value ? AI_DECISION_LABELS[value] : null;
+}
+
+// The model reports its own column names; these are what the agent reads instead.
+const DECISION_FACTOR_LABELS: Record<string, string> = {
+  Credit_History: 'Historique de crédit',
+  Loan_Amount_Term: 'Durée du prêt',
+  LoanAmount: 'Montant demandé',
+  ApplicantIncome: 'Revenu du demandeur',
+  CoapplicantIncome: 'Revenu du co-emprunteur',
+  Married: 'Situation familiale',
+  Dependents: 'Personnes à charge',
+  Education: "Niveau d'études",
+  Self_Employed: "Statut d'emploi",
+  Property_Area: "Zone d'habitation",
+  Gender: 'Genre'
+};
+
+export function decisionFactorLabel(feature: string): string {
+  return DECISION_FACTOR_LABELS[feature] ?? feature;
 }
 
 export function creditHistoryLabel(value?: string | null): string | null {
