@@ -108,3 +108,40 @@ jobs:
         with:
           sarif_file: trivy-${{ matrix.service }}.sarif
           category: trivy-image-${{ matrix.service }}
+
+  # ---------------------------------------------------------------- DAST
+  # Everything above is static (SAST/SCA): it inspects code and images without
+  # running them. This job attacks the application while it's actually running,
+  # catching runtime issues (misconfigured headers, XSS, exposed endpoints)
+  # that static analysis can't see.
+  dast-scan:
+    name: Dynamic scan (OWASP ZAP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the stack
+        run: |
+          cp .env.example .env
+          docker compose up --build -d
+
+      - name: Wait for the frontend to be ready
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4200 > /dev/null && exit 0
+            sleep 5
+          done
+          echo "Frontend never became ready" && exit 1
+
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: 'http://localhost:4200'
+          cmd_options: '-I' # don't fail the job on WARN-level findings; report them
+          fail_action: false
+          allow_issue_writing: false # don't file a GitHub issue per scan run
+          artifact_name: 'zap-report'
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down
