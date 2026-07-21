@@ -35,10 +35,13 @@ public class ClientService {
                 .birthDate(request.getBirthDate())
                 .gender(request.getGender())
                 .maritalStatus(request.getMaritalStatus())
+                .dependents(request.getDependents())
+                .educationLevel(request.getEducationLevel())
                 .phone(request.getPhone())
                 .email(request.getEmail())
                 .address(request.getAddress())
                 .city(request.getCity())
+                .propertyArea(request.getPropertyArea())
                 .profession(request.getProfession())
                 .employer(request.getEmployer())
                 .employmentType(request.getEmploymentType())
@@ -75,10 +78,13 @@ public class ClientService {
         client.setBirthDate(request.getBirthDate());
         client.setGender(request.getGender());
         client.setMaritalStatus(request.getMaritalStatus());
+        client.setDependents(request.getDependents());
+        client.setEducationLevel(request.getEducationLevel());
         client.setPhone(request.getPhone());
         client.setEmail(request.getEmail());
         client.setAddress(request.getAddress());
         client.setCity(request.getCity());
+        client.setPropertyArea(request.getPropertyArea());
         client.setProfession(request.getProfession());
         client.setEmployer(request.getEmployer());
         client.setEmploymentType(request.getEmploymentType());

@@ -17,6 +17,7 @@ public class CreditFileMapper {
                 .createdBy(creditFile.getCreatedBy())
                 .creditType(creditFile.getCreditType())
                 .loanAmount(creditFile.getLoanAmount())
+                .coapplicantIncome(creditFile.getCoapplicantIncome())
                 .loanDurationMonths(creditFile.getLoanDurationMonths())
                 .loanPurpose(creditFile.getLoanPurpose())
                 .interestRate(creditFile.getInterestRate())
@@ -31,7 +32,7 @@ public class CreditFileMapper {
                 .aiDecision(creditFile.getAiDecision())
                 .agentDecision(creditFile.getAgentDecision())
                 .comments(creditFile.getComments())
-                .mlPredictionResult(creditFile.getMlPredictionResult())
+                .decisionFactors(creditFile.getDecisionFactors())
                 .createdAt(creditFile.getCreatedAt())
                 .updatedAt(creditFile.getUpdatedAt())
                 .build();

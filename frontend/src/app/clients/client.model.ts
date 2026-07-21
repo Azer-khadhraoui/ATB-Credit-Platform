@@ -1,6 +1,8 @@
 export type Gender = 'MALE' | 'FEMALE';
 export type MaritalStatus = 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
 export type EmploymentType = 'PERMANENT' | 'CONTRACT' | 'SELF_EMPLOYED' | 'UNEMPLOYED' | 'RETIRED';
+export type EducationLevel = 'GRADUATE' | 'NOT_GRADUATE';
+export type PropertyArea = 'URBAN' | 'SEMIURBAN' | 'RURAL';
 
 export interface Client {
   id: string;
@@ -10,10 +12,13 @@ export interface Client {
   birthDate: string;
   gender: Gender;
   maritalStatus: MaritalStatus;
+  dependents: number;
+  educationLevel: EducationLevel;
   phone: string;
   email: string;
   address: string;
   city: string;
+  propertyArea: PropertyArea;
   profession?: string;
   employer?: string;
   employmentType: EmploymentType;
@@ -43,8 +48,27 @@ export const EMPLOYMENT_TYPE_OPTIONS: { value: EmploymentType; label: string }[]
   { value: 'RETIRED', label: 'Retraité' }
 ];
 
+export const EDUCATION_LEVEL_OPTIONS: { value: EducationLevel; label: string }[] = [
+  { value: 'GRADUATE', label: 'Diplômé (bac+ / supérieur)' },
+  { value: 'NOT_GRADUATE', label: 'Non diplômé' }
+];
+
+export const PROPERTY_AREA_OPTIONS: { value: PropertyArea; label: string }[] = [
+  { value: 'URBAN', label: 'Urbaine' },
+  { value: 'SEMIURBAN', label: 'Semi-urbaine' },
+  { value: 'RURAL', label: 'Rurale' }
+];
+
 export function genderLabel(value: Gender): string {
   return GENDER_OPTIONS.find((o) => o.value === value)?.label ?? value;
+}
+
+export function educationLevelLabel(value: EducationLevel): string {
+  return EDUCATION_LEVEL_OPTIONS.find((o) => o.value === value)?.label ?? value;
+}
+
+export function propertyAreaLabel(value: PropertyArea): string {
+  return PROPERTY_AREA_OPTIONS.find((o) => o.value === value)?.label ?? value;
 }
 
 export function maritalStatusLabel(value: MaritalStatus): string {

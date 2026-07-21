@@ -11,11 +11,15 @@ import tn.atb.backend.dto.ml.MlPredictionRequest;
 import tn.atb.backend.dto.ml.MlPredictionResponse;
 import tn.atb.backend.entity.Client;
 import tn.atb.backend.entity.CreditFile;
+import tn.atb.backend.entity.DecisionFactor;
 import tn.atb.backend.entity.enums.AIDecision;
 import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.entity.enums.CreditStatus;
+import tn.atb.backend.entity.enums.EducationLevel;
 import tn.atb.backend.entity.enums.EmploymentType;
+import tn.atb.backend.entity.enums.Gender;
 import tn.atb.backend.entity.enums.MaritalStatus;
+import tn.atb.backend.entity.enums.PropertyArea;
 import tn.atb.backend.entity.enums.RiskLevel;
 import tn.atb.backend.exception.ResourceNotFoundException;
 import tn.atb.backend.mapper.CreditFileMapper;
@@ -46,6 +50,7 @@ public class CreditFileService {
                 .createdBy(currentMatricule())
                 .creditType(request.getCreditType())
                 .loanAmount(request.getLoanAmount())
+                .coapplicantIncome(request.getCoapplicantIncome())
                 .loanDurationMonths(request.getLoanDurationMonths())
                 .loanPurpose(request.getLoanPurpose())
                 .interestRate(request.getInterestRate())
@@ -93,6 +98,7 @@ public class CreditFileService {
 
         creditFile.setCreditType(request.getCreditType());
         creditFile.setLoanAmount(request.getLoanAmount());
+        creditFile.setCoapplicantIncome(request.getCoapplicantIncome());
         creditFile.setLoanDurationMonths(request.getLoanDurationMonths());
         creditFile.setLoanPurpose(request.getLoanPurpose());
         creditFile.setInterestRate(request.getInterestRate());
@@ -128,6 +134,7 @@ public class CreditFileService {
         creditFile.setRiskScore(response.getRiskScore());
         creditFile.setRiskLevel(RiskLevel.valueOf(response.getRiskLevel()));
         creditFile.setAiDecision(AIDecision.valueOf(response.getAiDecision()));
+        creditFile.setDecisionFactors(toDecisionFactors(response));
         creditFile.setUpdatedAt(LocalDateTime.now());
 
         CreditFile saved = creditFileRepository.save(creditFile);
@@ -139,16 +146,41 @@ public class CreditFileService {
         return creditFileMapper.toResponse(saved, client);
     }
 
+    // Only the factors that carry real weight are kept: the tail is dominated by
+    // near-zero contributions that would add noise to the agent's screen without
+    // telling them anything.
+    private static final int MAX_STORED_FACTORS = 6;
+
+    private List<DecisionFactor> toDecisionFactors(MlPredictionResponse response) {
+        if (response.getFactors() == null) {
+            return List.of();
+        }
+        return response.getFactors().stream()
+                .limit(MAX_STORED_FACTORS)
+                .map(factor -> DecisionFactor.builder()
+                        .feature(factor.getFeature())
+                        .impact(factor.getImpact())
+                        .reducesRisk(factor.isReducesRisk())
+                        .build())
+                .toList();
+    }
+
     // The Loan Prediction dataset expresses LoanAmount in thousands (a value of 128 means 128,000).
     // Our platform stores the loan amount in raw TND, so we divide by this factor before sending it
     // to the model, keeping the app and the training data on the same scale.
     private static final double LOAN_AMOUNT_SCALE = 1000.0;
 
+    // The model's Dependents feature is capped at 3 in the training data ("3+" was
+    // collapsed into a single category), so values above it are clamped rather than
+    // sent as an unseen level.
+    private static final int MAX_DEPENDENTS = 3;
+
     /**
-     * Maps our domain model to the raw features expected by the FastAPI service (trained on the
-     * public Loan Prediction dataset). Client/CreditFile don't carry every field the dataset has
-     * (dependents, education level, property area, co-applicant income) — these are filled with
-     * reasonable defaults below until the platform captures them explicitly.
+     * Maps our domain model to the raw features expected by the FastAPI service, trained on the
+     * public Loan Prediction dataset. Every feature now comes from data the agent actually
+     * captures — earlier versions sent constants for dependents, education, co-applicant income
+     * and property area, which meant the model scored those four inputs identically for every
+     * applicant.
      */
     private MlPredictionRequest buildPredictionRequest(Client client, CreditFile creditFile) {
         boolean married = client.getMaritalStatus() == MaritalStatus.MARRIED;
@@ -159,19 +191,35 @@ public class CreditFileService {
         double loanAmountTnd = creditFile.getLoanAmount() != null ? creditFile.getLoanAmount() : 0;
         double loanAmountScaled = loanAmountTnd / LOAN_AMOUNT_SCALE;
 
+        int dependents = client.getDependents() != null
+                ? Math.min(client.getDependents(), MAX_DEPENDENTS)
+                : 0;
+
         return MlPredictionRequest.builder()
-                .gender(client.getGender().name().equals("MALE") ? "Male" : "Female")
+                .gender(client.getGender() == Gender.MALE ? "Male" : "Female")
                 .married(married ? "Yes" : "No")
-                .dependents(0)
-                .education("Graduate")
+                .dependents(dependents)
+                .education(client.getEducationLevel() == EducationLevel.NOT_GRADUATE ? "Not Graduate" : "Graduate")
                 .selfEmployed(selfEmployed ? "Yes" : "No")
                 .applicantIncome(client.getMonthlyIncome() != null ? client.getMonthlyIncome() : 0)
-                .coapplicantIncome(0)
+                .coapplicantIncome(creditFile.getCoapplicantIncome() != null ? creditFile.getCoapplicantIncome() : 0)
                 .loanAmount(loanAmountScaled)
                 .loanAmountTerm(creditFile.getLoanDurationMonths() != null ? creditFile.getLoanDurationMonths() : 0)
                 .creditHistory(creditHistory)
-                .propertyArea("Urban")
+                .propertyArea(mapPropertyArea(client.getPropertyArea()))
                 .build();
+    }
+
+    /** Converts our enum to the exact spelling the model was trained on. */
+    private String mapPropertyArea(PropertyArea area) {
+        if (area == null) {
+            return "Urban";
+        }
+        return switch (area) {
+            case SEMIURBAN -> "Semiurban";
+            case RURAL -> "Rural";
+            case URBAN -> "Urban";
+        };
     }
 
     /**

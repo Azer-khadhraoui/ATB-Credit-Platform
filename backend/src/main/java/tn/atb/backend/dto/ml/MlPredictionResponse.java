@@ -1,24 +1,31 @@
 package tn.atb.backend.dto.ml;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class MlPredictionResponse {
 
     private boolean approved;
-
-    @JsonProperty("risk_score")
     private double riskScore;
-
-    @JsonProperty("risk_level")
     private String riskLevel;
-
-    @JsonProperty("ai_decision")
     private String aiDecision;
-
-    @JsonProperty("model_name")
     private String modelName;
+
+    /** Per-feature attribution of this decision, strongest influence first. */
+    private List<MlDecisionFactor> factors;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class MlDecisionFactor {
+        private String feature;
+        private double impact;
+        private boolean reducesRisk;
+    }
 }
