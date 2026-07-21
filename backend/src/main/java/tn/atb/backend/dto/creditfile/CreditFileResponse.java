@@ -3,7 +3,6 @@ package tn.atb.backend.dto.creditfile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import tn.atb.backend.entity.MLPredictionResult;
 import tn.atb.backend.entity.enums.AIDecision;
 import tn.atb.backend.entity.enums.CreditStatus;
 import tn.atb.backend.entity.enums.RiskLevel;
@@ -22,6 +21,7 @@ public class CreditFileResponse {
     private String createdBy;
     private String creditType;
     private Double loanAmount;
+    private Double coapplicantIncome;
     private Integer loanDurationMonths;
     private String loanPurpose;
     private Double interestRate;
@@ -36,7 +36,6 @@ public class CreditFileResponse {
     private AIDecision aiDecision;
     private String agentDecision;
     private String comments;
-    private MLPredictionResult mlPredictionResult;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -35,6 +35,9 @@ public class CreditFile {
 
     private Double loanAmount;
 
+    /** Monthly income of a co-borrower, when the application has one — a risk-model feature. */
+    private Double coapplicantIncome;
+
     private Integer loanDurationMonths;
 
     private String loanPurpose;
@@ -62,8 +65,6 @@ public class CreditFile {
     private String agentDecision;
 
     private String comments;
-
-    private MLPredictionResult mlPredictionResult;
 
     private LocalDateTime createdAt;
 

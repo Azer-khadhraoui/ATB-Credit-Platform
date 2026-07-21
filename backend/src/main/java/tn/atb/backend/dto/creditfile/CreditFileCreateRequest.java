@@ -23,6 +23,9 @@ public class CreditFileCreateRequest {
     @PositiveOrZero(message = "Loan amount must be positive")
     private Double loanAmount;
 
+    @PositiveOrZero(message = "Co-applicant income must be positive")
+    private Double coapplicantIncome;
+
     @NotNull(message = "Loan duration is required")
     @Min(value = 1, message = "Loan duration must be at least 1 month")
     private Integer loanDurationMonths;
