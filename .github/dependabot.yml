@@ -1,11 +1,18 @@
 version: 2
+
+# Updates are grouped: without grouping, Dependabot opens one PR per package,
+# which for this project meant 20 PRs (and ~250 CI jobs) in a single run.
+# One PR per ecosystem keeps the queue manageable while still surfacing everything.
 updates:
   # Backend — Maven
   - package-ecosystem: "maven"
     directory: "/backend"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    groups:
+      backend-dependencies:
+        patterns: ["*"]
     labels:
       - "dependencies"
       - "backend"
@@ -14,8 +21,15 @@ updates:
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    groups:
+      # Angular releases its packages in lockstep — a partial bump breaks the build.
+      angular:
+        patterns: ["@angular/*"]
+      other-frontend-dependencies:
+        patterns: ["*"]
+        exclude-patterns: ["@angular/*"]
     labels:
       - "dependencies"
       - "frontend"
@@ -24,31 +38,27 @@ updates:
   - package-ecosystem: "pip"
     directory: "/ml-service"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    groups:
+      ml-dependencies:
+        patterns: ["*"]
     labels:
       - "dependencies"
       - "ml-service"
 
   # Dockerfiles — base image updates (security patches in Alpine/slim/nginx)
   - package-ecosystem: "docker"
-    directory: "/backend"
+    directories:
+      - "/backend"
+      - "/frontend"
+      - "/ml-service"
     schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "docker"
-  - package-ecosystem: "docker"
-    directory: "/frontend"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "docker"
-  - package-ecosystem: "docker"
-    directory: "/ml-service"
-    schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      docker-base-images:
+        patterns: ["*"]
     labels:
       - "dependencies"
       - "docker"
@@ -58,7 +68,11 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns: ["*"]
     labels:
       - "dependencies"
       - "ci"
