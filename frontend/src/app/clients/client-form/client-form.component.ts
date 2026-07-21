@@ -3,7 +3,13 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ClientService } from '../client.service';
-import { EMPLOYMENT_TYPE_OPTIONS, GENDER_OPTIONS, MARITAL_STATUS_OPTIONS } from '../client.model';
+import {
+  EDUCATION_LEVEL_OPTIONS,
+  EMPLOYMENT_TYPE_OPTIONS,
+  GENDER_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  PROPERTY_AREA_OPTIONS
+} from '../client.model';
 
 @Component({
   selector: 'app-client-form',
@@ -21,6 +27,8 @@ export class ClientFormComponent {
   readonly genders = GENDER_OPTIONS;
   readonly maritalStatuses = MARITAL_STATUS_OPTIONS;
   readonly employmentTypes = EMPLOYMENT_TYPE_OPTIONS;
+  readonly educationLevels = EDUCATION_LEVEL_OPTIONS;
+  readonly propertyAreas = PROPERTY_AREA_OPTIONS;
 
   private readonly clientId = this.route.snapshot.paramMap.get('id');
   readonly isEditMode = !!this.clientId;
@@ -37,11 +45,14 @@ export class ClientFormComponent {
     birthDate: ['', [Validators.required]],
     gender: ['', [Validators.required]],
     maritalStatus: ['', [Validators.required]],
+    dependents: [0 as number | null, [Validators.required, Validators.min(0)]],
+    educationLevel: ['', [Validators.required]],
 
     phone: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     address: ['', [Validators.required]],
     city: ['', [Validators.required]],
+    propertyArea: ['', [Validators.required]],
 
     profession: [''],
     employer: [''],
@@ -71,10 +82,13 @@ export class ClientFormComponent {
           birthDate: client.birthDate?.substring(0, 10),
           gender: client.gender,
           maritalStatus: client.maritalStatus,
+          dependents: client.dependents ?? 0,
+          educationLevel: client.educationLevel,
           phone: client.phone,
           email: client.email,
           address: client.address,
           city: client.city,
+          propertyArea: client.propertyArea,
           profession: client.profession ?? '',
           employer: client.employer ?? '',
           employmentType: client.employmentType,
@@ -108,10 +122,13 @@ export class ClientFormComponent {
       birthDate: value.birthDate!,
       gender: value.gender as any,
       maritalStatus: value.maritalStatus as any,
+      dependents: value.dependents!,
+      educationLevel: value.educationLevel as any,
       phone: value.phone!,
       email: value.email!,
       address: value.address!,
       city: value.city!,
+      propertyArea: value.propertyArea as any,
       profession: value.profession || undefined,
       employer: value.employer || undefined,
       employmentType: value.employmentType as any,

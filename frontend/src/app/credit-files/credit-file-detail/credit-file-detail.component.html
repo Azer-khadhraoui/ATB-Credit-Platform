@@ -72,6 +72,10 @@
               <span class="tile__value">{{ cf.downPayment != null ? (cf.downPayment | number: '1.0-0') + ' TND' : '—' }}</span>
             </div>
             <div class="tile">
+              <span class="tile__label">Revenu co-emprunteur</span>
+              <span class="tile__value">{{ cf.coapplicantIncome ? (cf.coapplicantIncome | number: '1.0-0') + ' TND' : '—' }}</span>
+            </div>
+            <div class="tile">
               <span class="tile__label">Crédits en cours</span>
               <span class="tile__value">{{ cf.existingCredits ?? '—' }}</span>
             </div>
@@ -138,6 +142,38 @@
                 <span class="ai-decision">{{ aiDecisionLabel(cf.aiDecision) }}</span>
               </div>
             </div>
+
+            @let factors = weightedFactors(cf);
+            @if (factors.length > 0) {
+              <div class="ai-why">
+                <div class="ai-why__header">
+                  <i class="fa-solid fa-lightbulb"></i>
+                  <span>Pourquoi cette décision ?</span>
+                </div>
+                <p class="ai-why__intro">Poids de chaque critère dans le score, du plus déterminant au moins influent.</p>
+
+                <div class="factors">
+                  @for (f of factors; track f.feature) {
+                    <div class="factor">
+                      <div class="factor__head">
+                        <span class="factor__label">{{ f.label }}</span>
+                        <span class="factor__dir" [class.factor__dir--up]="!f.reducesRisk">
+                          <i class="fa-solid" [class.fa-arrow-down]="f.reducesRisk" [class.fa-arrow-up]="!f.reducesRisk"></i>
+                        </span>
+                      </div>
+                      <div class="factor__track">
+                        <div class="factor__fill" [class.factor__fill--up]="!f.reducesRisk" [style.width.%]="f.width"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <div class="ai-why__legend">
+                  <span><i class="fa-solid fa-arrow-down"></i> réduit le risque</span>
+                  <span><i class="fa-solid fa-arrow-up"></i> augmente le risque</span>
+                </div>
+              </div>
+            }
           } @else {
             <div class="ai-empty">
               <i class="fa-solid fa-microchip"></i>

@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import List, Literal
 from pydantic import BaseModel, Field
 
 
@@ -18,9 +18,24 @@ class LoanPredictionRequest(BaseModel):
     property_area: Literal["Urban", "Semiurban", "Rural"]
 
 
+class DecisionFactor(BaseModel):
+    """How much one feature pushed this specific decision, and in which direction.
+
+    `impact` is the feature's contribution to the log-odds: coefficient x (value -
+    training mean). Weighting by the distance from an average applicant is what makes
+    it specific to this file rather than a general statement about the model.
+    Positive impact lowers the risk score; negative raises it.
+    """
+
+    feature: str
+    impact: float
+    reduces_risk: bool
+
+
 class LoanPredictionResponse(BaseModel):
     approved: bool
     risk_score: float
     risk_level: Literal["LOW", "MEDIUM", "HIGH"]
     ai_decision: Literal["ACCEPTABLE", "RISKY", "REJECTED"]
     model_name: str
+    factors: List[DecisionFactor] = []
