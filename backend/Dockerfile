@@ -1,5 +1,5 @@
 # --- Build stage -------------------------------------------------------
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3-eclipse-temurin-26 AS build
 WORKDIR /app
 
 # Cache dependencies separately from source for faster rebuilds.
@@ -10,7 +10,7 @@ COPY src ./src
 RUN mvn -B clean package -DskipTests
 
 # --- Runtime stage -------------------------------------------------------
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Run as a non-root user (DevSecOps: no container process runs as root).
