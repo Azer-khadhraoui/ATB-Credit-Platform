@@ -1,7 +1,7 @@
 # Runtime-only dependencies for the containerized ML service.
 # (requirements.txt also includes jupyter/matplotlib/seaborn, needed only for
 # the training notebook — not for serving predictions.)
-fastapi==0.115.0
+fastapi==0.139.2
 uvicorn[standard]==0.30.6
 pandas==2.2.2
 numpy==1.26.4
