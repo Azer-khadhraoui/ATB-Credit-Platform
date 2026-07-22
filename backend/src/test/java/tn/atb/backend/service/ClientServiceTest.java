@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tn.atb.backend.dto.client.ClientCreateRequest;
 import tn.atb.backend.dto.client.ClientResponse;
+import tn.atb.backend.dto.client.ClientUpdateRequest;
 import tn.atb.backend.entity.Client;
 import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.exception.DuplicateResourceException;
@@ -14,8 +15,10 @@ import tn.atb.backend.exception.ResourceNotFoundException;
 import tn.atb.backend.mapper.ClientMapper;
 import tn.atb.backend.repository.ClientRepository;
 
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -93,5 +96,33 @@ class ClientServiceTest {
 
         verify(clientRepository).delete(existing);
         verify(auditLogService).log(eq(AuditAction.DELETE), eq("Client"), eq("c-9"), any());
+    }
+
+    @Test
+    void getAllMapsEveryClient() {
+        when(clientRepository.findAll()).thenReturn(List.of(
+                Client.builder().id("c-1").build(),
+                Client.builder().id("c-2").build()));
+        when(clientMapper.toResponse(any(Client.class))).thenReturn(ClientResponse.builder().build());
+
+        assertThat(clientService.getAllClients()).hasSize(2);
+        verify(clientMapper, org.mockito.Mockito.times(2)).toResponse(any(Client.class));
+    }
+
+    @Test
+    void updateAppliesTheChangesAndLogsIt() {
+        Client existing = Client.builder().id("c-9").firstName("Old").lastName("Name").build();
+        when(clientRepository.findById("c-9")).thenReturn(Optional.of(existing));
+        when(clientRepository.save(any(Client.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(clientMapper.toResponse(any(Client.class))).thenReturn(ClientResponse.builder().build());
+
+        ClientUpdateRequest request = new ClientUpdateRequest();
+        request.setFirstName("New");
+        request.setLastName("Name");
+
+        clientService.updateClient("c-9", request);
+
+        assertThat(existing.getFirstName()).isEqualTo("New");
+        verify(auditLogService).log(eq(AuditAction.UPDATE), eq("Client"), eq("c-9"), any());
     }
 }

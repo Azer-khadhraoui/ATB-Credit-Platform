@@ -1,17 +1,23 @@
 package tn.atb.backend.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tn.atb.backend.client.MlServiceClient;
+import tn.atb.backend.dto.creditfile.CreditFileCreateRequest;
+import tn.atb.backend.dto.creditfile.CreditFileUpdateRequest;
 import tn.atb.backend.dto.ml.MlPredictionRequest;
 import tn.atb.backend.dto.ml.MlPredictionResponse;
 import tn.atb.backend.dto.ml.MlPredictionResponse.MlDecisionFactor;
 import tn.atb.backend.entity.Client;
 import tn.atb.backend.entity.CreditFile;
+import tn.atb.backend.entity.enums.AuditAction;
 import tn.atb.backend.entity.enums.EducationLevel;
 import tn.atb.backend.entity.enums.EmploymentType;
 import tn.atb.backend.entity.enums.Gender;
@@ -29,6 +35,8 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -46,6 +54,11 @@ class CreditFileServiceTest {
     @Mock private MlServiceClient mlServiceClient;
 
     @InjectMocks private CreditFileService creditFileService;
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     // --- Fixtures -----------------------------------------------------------------------------
 
@@ -234,5 +247,67 @@ class CreditFileServiceTest {
 
         assertThatThrownBy(() -> creditFileService.analyzeCreditFile("file-1"))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // --- CRUD paths ---------------------------------------------------------------------------
+
+    @Test
+    void createPersistsTheFileAndLogsIt() {
+        // createCreditFile stamps createdBy from the security context.
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("123456", null));
+        when(clientRepository.findById("client-1")).thenReturn(Optional.of(baseClient().build()));
+        when(creditFileRepository.save(any(CreditFile.class))).thenAnswer(inv -> {
+            CreditFile f = inv.getArgument(0);
+            f.setId("file-1");
+            return f;
+        });
+
+        CreditFileCreateRequest request = new CreditFileCreateRequest();
+        request.setClientId("client-1");
+        request.setCreditType("Crédit auto");
+        request.setLoanAmount(20000.0);
+        request.setLoanDurationMonths(48);
+        request.setLoanPurpose("Voiture");
+
+        creditFileService.createCreditFile(request);
+
+        verify(auditLogService).log(eq(AuditAction.CREATE), eq("CreditFile"), eq("file-1"), any());
+    }
+
+    @Test
+    void createThrowsWhenClientMissing() {
+        when(clientRepository.findById("nope")).thenReturn(Optional.empty());
+
+        CreditFileCreateRequest request = new CreditFileCreateRequest();
+        request.setClientId("nope");
+
+        assertThatThrownBy(() -> creditFileService.createCreditFile(request))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void updateAppliesChangesAndLogsIt() {
+        when(creditFileRepository.findById("file-1")).thenReturn(Optional.of(baseFile().build()));
+        when(creditFileRepository.save(any(CreditFile.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(clientRepository.findById("client-1")).thenReturn(Optional.of(baseClient().build()));
+
+        CreditFileUpdateRequest request = new CreditFileUpdateRequest();
+        request.setCreditType("Crédit immobilier");
+        request.setLoanAmount(50000.0);
+        request.setLoanDurationMonths(120);
+        request.setLoanPurpose("Maison");
+
+        creditFileService.updateCreditFile("file-1", request);
+
+        verify(auditLogService).log(eq(AuditAction.UPDATE), eq("CreditFile"), eq("file-1"), any());
+    }
+
+    @Test
+    void getAllMapsEveryFileWithItsClient() {
+        when(creditFileRepository.findAll()).thenReturn(List.of(baseFile().build()));
+        when(clientRepository.findAllById(any())).thenReturn(List.of(baseClient().build()));
+
+        assertThat(creditFileService.getAllCreditFiles()).hasSize(1);
     }
 }
