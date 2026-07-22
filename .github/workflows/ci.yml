@@ -73,17 +73,31 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./ml-service
-        run: pip install -r requirements-docker.txt
+        run: pip install -r requirements-dev.txt
 
-      - name: Verify the service and model load
+      - name: Run tests with coverage
         working-directory: ./ml-service
-        run: python -c "from app.main import app; from app.model import model_service; print('Model loaded:', model_service.model_name)"
+        run: python -m pytest -q --cov=app --cov-report=xml
 
   # ---------------------------------------------------------------- Code quality
   sonarcloud:
     name: Code quality (SonarCloud)
     runs-on: ubuntu-latest
     needs: [backend, frontend, ml-service]
+
+    # The context test boots Spring, which connects to MongoDB; the scan runs the full
+    # test suite so JaCoCo can measure coverage, so it needs the same server the backend job uses.
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -96,9 +110,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Compile backend (for Java analysis)
+      - name: Build, test and measure coverage (for Java analysis)
         working-directory: ./backend
-        run: mvn -B compile
+        run: mvn -B clean verify
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
@@ -110,6 +124,17 @@ jobs:
       - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Test ML service with coverage (for Python analysis)
+        working-directory: ./ml-service
+        run: |
+          pip install -r requirements-dev.txt
+          python -m pytest -q --cov=app --cov-report=xml
 
       - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v8.2.1
