@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
 
@@ -11,6 +12,9 @@ jobs:
   backend:
     name: Backend (Spring Boot)
     runs-on: ubuntu-latest
+    # A tag push targets a commit already validated on main; re-running the full
+    # suite here would just repeat work. Only publish-images runs for tags.
+    if: github.ref_type != 'tag'
 
     # BackendApplicationTests boots the full Spring context, which opens a MongoDB
     # connection (auto-index-creation runs at startup), so the test needs a real server.
@@ -42,6 +46,7 @@ jobs:
   frontend:
     name: Frontend (Angular)
     runs-on: ubuntu-latest
+    if: github.ref_type != 'tag'
     steps:
       - uses: actions/checkout@v4
 
@@ -68,6 +73,7 @@ jobs:
   ml-service:
     name: ML Service (FastAPI)
     runs-on: ubuntu-latest
+    if: github.ref_type != 'tag'
     steps:
       - uses: actions/checkout@v4
 
@@ -88,6 +94,7 @@ jobs:
   sonarcloud:
     name: Code quality (SonarCloud)
     runs-on: ubuntu-latest
+    if: github.ref_type != 'tag'
     needs: [backend, frontend, ml-service]
 
     # The context test boots Spring, which connects to MongoDB; the scan runs the full
@@ -155,6 +162,7 @@ jobs:
   docker-build:
     name: Build Docker images
     runs-on: ubuntu-latest
+    if: github.ref_type != 'tag'
     needs: [backend, frontend, ml-service]
     strategy:
       matrix:
@@ -184,3 +192,47 @@ jobs:
           name: image-${{ matrix.service }}
           path: /tmp/image.tar
           retention-days: 1
+
+  # ---------------------------------------------------------------- Release
+  # Only runs when a v* tag is pushed (see the release process: git tag v1.0.0 && git
+  # push origin v1.0.0). Publishes the three images to GitHub Container Registry so
+  # they can be pulled directly, e.g. `docker pull ghcr.io/<owner>/atb-backend:v1.0.0`.
+  publish-images:
+    name: Publish images to GHCR
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service: [backend, frontend, ml-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # GHCR image names must be lowercase; the GitHub username (Azer-khadhraoui) is not.
+      - name: Compute lowercase image owner
+        run: echo "OWNER_LC=${OWNER,,}" >> "$GITHUB_ENV"
+        env:
+          OWNER: ${{ github.repository_owner }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/atb-${{ matrix.service }}:${{ github.ref_name }}
+            ghcr.io/${{ env.OWNER_LC }}/atb-${{ matrix.service }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
