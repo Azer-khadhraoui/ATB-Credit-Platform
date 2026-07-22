@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,26 @@ import java.util.Map;
 @Service
 public class JwtService {
 
+    /** HS256 needs a key of at least 256 bits, i.e. 32 bytes / 32 ASCII characters. */
+    private static final int MIN_SECRET_LENGTH = 32;
+
     @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.expiration}")
     private long expirationMs;
+
+    // Fail fast at startup rather than signing tokens with a missing or weak key: a blank
+    // secret would otherwise fall through to a runtime error on the first login, and a short
+    // one would be rejected deep inside jjwt with a less obvious message.
+    @PostConstruct
+    void validateSecret() {
+        if (secret == null || secret.length() < MIN_SECRET_LENGTH) {
+            throw new IllegalStateException(
+                    "jwt.secret is missing or too short. Set the JWT_SECRET environment variable to a "
+                            + "value of at least " + MIN_SECRET_LENGTH + " characters (see .env.example).");
+        }
+    }
 
     private SecretKey key() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
