@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { CreditFile } from '../credit-file.model';
 import { CreditFileService } from '../credit-file.service';
 import { CreditFileDetailComponent } from './credit-file-detail.component';
@@ -23,33 +23,61 @@ function makeCreditFile(overrides: Partial<CreditFile> = {}): CreditFile {
 }
 
 describe('CreditFileDetailComponent', () => {
-  let component: CreditFileDetailComponent;
+  let getById: jasmine.Spy;
+  let analyze: jasmine.Spy;
 
   beforeEach(() => {
-    const serviceStub = {
-      getById: () => of(makeCreditFile()),
-      analyze: () => of(makeCreditFile())
-    };
-    const routeStub = { snapshot: { paramMap: { get: () => 'file-1' } } };
+    getById = jasmine.createSpy('getById').and.returnValue(of(makeCreditFile()));
+    analyze = jasmine.createSpy('analyze').and.returnValue(of(makeCreditFile()));
 
     TestBed.configureTestingModule({
       imports: [CreditFileDetailComponent],
       providers: [
-        { provide: CreditFileService, useValue: serviceStub },
-        { provide: ActivatedRoute, useValue: routeStub }
+        { provide: CreditFileService, useValue: { getById, analyze } },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'file-1' } } } }
       ]
     });
+  });
 
-    component = TestBed.createComponent(CreditFileDetailComponent).componentInstance;
+  /** Instantiates the component; the constructor immediately calls getById. */
+  function create(): CreditFileDetailComponent {
+    return TestBed.createComponent(CreditFileDetailComponent).componentInstance;
+  }
+
+  describe('initial load', () => {
+    it('exposes the loaded file and stops the spinner', () => {
+      const component = create();
+      expect(component.creditFile()?.id).toBe('file-1');
+      expect(component.loading()).toBeFalse();
+    });
+
+    it('surfaces the error message when loading fails', () => {
+      getById.and.returnValue(throwError(() => ({ error: { message: 'introuvable' } })));
+      const component = create();
+      expect(component.errorMessage()).toBe('introuvable');
+      expect(component.loading()).toBeFalse();
+    });
+  });
+
+  describe('label helpers', () => {
+    it('delegates each label to the model', () => {
+      const component = create();
+      expect(component.statusLabel('DRAFT')).toBe('Nouveau');
+      expect(component.riskLevelLabel('LOW')).toBe('Faible');
+      expect(component.aiDecisionLabel('ACCEPTABLE')).toBe('Favorable');
+      expect(component.creditHistoryLabel('GOOD')).toBe('Bon — aucun incident de paiement');
+    });
   });
 
   describe('weightedFactors', () => {
     it('returns an empty list when there are no factors', () => {
+      const component = create();
       expect(component.weightedFactors(makeCreditFile({ decisionFactors: [] }))).toEqual([]);
       expect(component.weightedFactors(makeCreditFile({ decisionFactors: null }))).toEqual([]);
     });
 
     it('scales each bar against the strongest factor and labels it', () => {
+      const component = create();
       const cf = makeCreditFile({
         decisionFactors: [
           { feature: 'Credit_History', impact: -2.0, reducesRisk: false },
@@ -60,34 +88,57 @@ describe('CreditFileDetailComponent', () => {
 
       const result = component.weightedFactors(cf);
 
-      // The strongest |impact| (2.0) fills the bar; the others are its fractions.
       expect(result.map((f) => f.width)).toEqual([100, 50, 25]);
-      // Model column names are replaced by readable labels.
       expect(result[0].label).toBe('Historique de crédit');
-      // The direction flag is carried through untouched.
       expect(result[0].reducesRisk).toBeFalse();
     });
 
     it('produces zero width when every factor has zero impact', () => {
+      const component = create();
       const cf = makeCreditFile({
         decisionFactors: [
           { feature: 'Gender', impact: 0, reducesRisk: false },
           { feature: 'Married', impact: 0, reducesRisk: true }
         ]
       });
-
       expect(component.weightedFactors(cf).every((f) => f.width === 0)).toBeTrue();
     });
   });
 
   describe('hasAnalysis', () => {
     it('is true once a score, level or decision is present', () => {
+      const component = create();
       expect(component.hasAnalysis(makeCreditFile({ riskScore: 12 }))).toBeTrue();
       expect(component.hasAnalysis(makeCreditFile({ aiDecision: 'ACCEPTABLE' }))).toBeTrue();
     });
 
     it('is false on an unanalysed file', () => {
+      const component = create();
       expect(component.hasAnalysis(makeCreditFile())).toBeFalse();
+    });
+  });
+
+  describe('runAnalysis', () => {
+    it('replaces the file with the analysed result and clears the spinner', () => {
+      const component = create();
+      analyze.and.returnValue(of(makeCreditFile({ riskScore: 42, riskLevel: 'MEDIUM' })));
+
+      component.runAnalysis();
+
+      expect(analyze).toHaveBeenCalledWith('file-1');
+      expect(component.creditFile()?.riskScore).toBe(42);
+      expect(component.analyzing()).toBeFalse();
+      expect(component.analyzeError()).toBeNull();
+    });
+
+    it('reports the error and stops the spinner when analysis fails', () => {
+      const component = create();
+      analyze.and.returnValue(throwError(() => ({ error: { message: 'moteur indisponible' } })));
+
+      component.runAnalysis();
+
+      expect(component.analyzeError()).toBe('moteur indisponible');
+      expect(component.analyzing()).toBeFalse();
     });
   });
 });
