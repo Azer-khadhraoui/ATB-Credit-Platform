@@ -1,0 +1,64 @@
+# The ML service is only ever called by the backend (server to server), so it stays internal:
+# a ClusterIP Service reachable in-cluster as ml-service:8000, never exposed outside.
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-service
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: ml-service
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ml-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: ml-service
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ml-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ml-service
+        app.kubernetes.io/part-of: atb-credit-platform
+    spec:
+      containers:
+        - name: ml-service
+          image: atb-credit-platform-ml-service:latest
+          # Use the image built locally by `docker compose build`; never reach out to a registry.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 768Mi

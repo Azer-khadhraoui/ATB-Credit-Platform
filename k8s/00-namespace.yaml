@@ -1,0 +1,8 @@
+# All ATB Credit Platform resources live in one namespace, so the whole stack can be
+# inspected or torn down with a single `-n atb` (or `kubectl delete namespace atb`).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: atb
+  labels:
+    app.kubernetes.io/part-of: atb-credit-platform
