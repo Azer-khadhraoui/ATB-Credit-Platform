@@ -1,0 +1,15 @@
+# Non-secret runtime configuration, mirroring the `environment:` block of docker-compose.yml.
+# Service hostnames (mongo, ml-service) are the in-cluster DNS names of the Services below —
+# Kubernetes resolves them within the namespace exactly like Compose resolves service names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atb-config
+  namespace: atb
+  labels:
+    app.kubernetes.io/part-of: atb-credit-platform
+data:
+  SPRING_MONGODB_URI: mongodb://mongo:27017/atb_credit_platform
+  ML_SERVICE_URL: http://ml-service:8000
+  JWT_EXPIRATION: "86400000"
+  APP_UPLOAD_DIR: /app/uploads

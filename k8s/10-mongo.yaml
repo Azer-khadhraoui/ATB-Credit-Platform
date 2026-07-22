@@ -1,0 +1,77 @@
+# Headless Service (clusterIP: None) gives the StatefulSet pod a stable DNS name, `mongo`.
+# The backend connects to mongo:27017 through it, just as it used the `mongo` Compose service.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mongo
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+---
+# A StatefulSet (not a Deployment) because MongoDB owns state: it gives the pod a stable identity
+# and binds it to its own PersistentVolumeClaim, so the data survives restarts and rescheduling.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  serviceName: mongo
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongo
+        app.kubernetes.io/part-of: atb-credit-platform
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          # Ready only once the server answers a ping; kept alive as long as the port listens.
+          readinessProbe:
+            exec:
+              command: ["mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          livenessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+  # Each replica gets its own 1Gi disk; the claim is recreated with the pod but the data is not lost.
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
