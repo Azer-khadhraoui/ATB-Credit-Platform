@@ -56,6 +56,11 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
+      - name: Test with coverage
+        working-directory: ./frontend
+        # ubuntu runners ship Google Chrome; the no-sandbox launcher is required in CI.
+        run: npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage
+
       - name: Build (production)
         working-directory: ./frontend
         run: npm run build -- --configuration production
@@ -124,6 +129,10 @@ jobs:
       - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
+
+      - name: Test frontend with coverage (for JS/TS analysis)
+        working-directory: ./frontend
+        run: npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
