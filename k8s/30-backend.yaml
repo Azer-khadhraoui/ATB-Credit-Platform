@@ -1,0 +1,111 @@
+# Persistent storage for uploaded avatars, replacing the `backend_uploads` Compose volume.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-uploads
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+# LoadBalancer so the browser can reach the API at localhost:8081 — the Angular app calls
+# http://localhost:8081/api directly (see frontend environment.ts), so the backend must be
+# published externally on that exact port, not just reachable inside the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: backend
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: backend
+        app.kubernetes.io/part-of: atb-credit-platform
+    spec:
+      # Kubernetes has no depends_on; these init containers hold the pod back until its
+      # dependencies accept connections, reproducing the Compose `condition: service_healthy`.
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z mongo 27017; do echo waiting for mongo; sleep 2; done"]
+        - name: wait-for-ml
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z ml-service 8000; do echo waiting for ml-service; sleep 2; done"]
+      containers:
+        - name: backend
+          image: atb-credit-platform-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          # Non-secret settings come from the ConfigMap; the signing key comes from the Secret.
+          envFrom:
+            - configMapRef:
+                name: atb-config
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: atb-jwt
+                  key: JWT_SECRET
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/uploads
+          # Spring Boot is slow to start, so a startup probe guards the boot window; once it
+          # passes, the faster liveness/readiness probes take over.
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8081
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8081
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: backend-uploads

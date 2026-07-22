@@ -1,0 +1,2 @@
+# The real Secret (filled-in copy of 02-secret.example.yaml) must never be committed.
+secret.yaml
