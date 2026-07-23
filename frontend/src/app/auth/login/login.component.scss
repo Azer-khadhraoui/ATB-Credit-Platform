@@ -43,6 +43,27 @@
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
+  // Replays on every navigation: the router destroys and recreates this element,
+  // so a fresh mount always starts the entrance animation from scratch.
+  animation: cardEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+
+  &--leaving {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+    pointer-events: none;
+  }
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .login-card__form {
@@ -125,19 +146,6 @@
     &:focus-within {
       border-color: var(--atb-red);
       box-shadow: 0 0 0 3px rgba(200, 19, 79, 0.12);
-    }
-  }
-
-  .forgot-link {
-    display: block;
-    text-align: right;
-    font-size: 13px;
-    color: var(--atb-red);
-    text-decoration: none;
-    margin-bottom: 24px;
-
-    &:hover {
-      text-decoration: underline;
     }
   }
 
@@ -251,5 +259,128 @@
   .login-card__form .form-header__icon {
     width: 120px;
     height: 120px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Post-login moment: the logo makes an entrance — a soft red ripple breathing
+// out behind it — rather than an instant, unceremonious jump to the dashboard.
+// ---------------------------------------------------------------------------
+
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #fff 0%, #fdf1f5 55%, #fbe0e9 100%);
+  // Matches SUCCESS_ANIMATION_MS in the component: fades in, holds, fades out.
+  animation: overlayLifecycle 1.2s ease both;
+}
+
+.success-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+
+.success-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
+  border-radius: 50%;
+  border: 2px solid rgba(200, 19, 79, 0.35);
+  animation: ringExpand 1.2s ease-out infinite;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(200, 19, 79, 0.22);
+    animation: ringExpand 1.2s ease-out 0.4s infinite;
+  }
+}
+
+.success-logo {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 26px rgba(200, 19, 79, 0.35));
+  animation: logoWelcome 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.success-dots {
+  position: relative;
+  display: flex;
+  gap: 9px;
+  opacity: 0;
+  animation: dotsFadeIn 0.4s ease 0.55s both;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--atb-red);
+    animation: dotBounce 0.9s ease-in-out infinite;
+
+    &:nth-child(2) { animation-delay: 0.15s; }
+    &:nth-child(3) { animation-delay: 0.3s; }
+  }
+}
+
+@keyframes overlayLifecycle {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes logoWelcome {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ringExpand {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes dotsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dotBounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-6px);
+    opacity: 1;
   }
 }

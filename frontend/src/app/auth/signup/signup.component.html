@@ -1,5 +1,5 @@
 <div class="login-page">
-  <div class="login-card">
+  <div class="login-card" [class.login-card--leaving]="leaving()">
     <div class="login-card__form">
       <img class="form-header__icon" src="/images/logoatbicon.webp" alt="ATB" />
 
@@ -105,7 +105,7 @@
       </form>
 
       <p class="create-account">
-        Vous avez déjà un compte ? <a routerLink="/login">Se connecter</a>
+        Vous avez déjà un compte ? <a href="/login" (click)="goToLogin($event)">Se connecter</a>
       </p>
     </div>
 

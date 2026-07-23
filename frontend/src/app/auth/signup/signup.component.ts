@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -12,17 +12,21 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.scss'
 })
 export class SignupComponent {
+  /** How long the exit transition plays before the route actually changes. */
+  private static readonly TRANSITION_MS = 280;
+
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly leaving = signal(false);
 
   signupForm: FormGroup = this.fb.group(
     {
@@ -71,11 +75,21 @@ export class SignupComponent {
         role: 'AGENT_CREDIT'
       })
       .subscribe({
-        next: () => this.router.navigate(['/login']),
+        next: () => {
+          this.leaving.set(true);
+          setTimeout(() => this.router.navigate(['/login']), SignupComponent.TRANSITION_MS);
+        },
         error: (err) => {
           this.loading.set(false);
           this.errorMessage.set(err?.error?.message ?? "Échec de la création du compte. Réessayez.");
         }
       });
+  }
+
+  /** Plays the card's exit transition before switching to the login route. */
+  goToLogin(event: Event): void {
+    event.preventDefault();
+    this.leaving.set(true);
+    setTimeout(() => this.router.navigate(['/login']), SignupComponent.TRANSITION_MS);
   }
 }

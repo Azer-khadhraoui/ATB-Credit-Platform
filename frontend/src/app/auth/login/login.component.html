@@ -1,5 +1,5 @@
 <div class="login-page">
-  <div class="login-card">
+  <div class="login-card" [class.login-card--leaving]="leaving()">
     <div class="login-card__form">
       <img class="form-header__icon" src="/images/logoatbicon.webp" alt="ATB" />
 
@@ -39,8 +39,6 @@
           </span>
         }
 
-        <a class="forgot-link" href="#">Mot de passe oublié ?</a>
-
         @if (errorMessage()) {
           <p class="form-error">{{ errorMessage() }}</p>
         }
@@ -51,7 +49,7 @@
       </form>
 
       <p class="create-account">
-        Vous n'avez pas de compte ? <a routerLink="/signup">Créer un compte</a>
+        Vous n'avez pas de compte ? <a href="/signup" (click)="goToSignup($event)">Créer un compte</a>
       </p>
     </div>
 
@@ -63,4 +61,16 @@
       </div>
     </div>
   </div>
+
+  @if (loginSuccess()) {
+    <div class="success-overlay">
+      <div class="success-content">
+        <div class="success-ring"></div>
+        <img class="success-logo" src="/images/logoatbicon.webp" alt="ATB" />
+        <div class="success-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  }
 </div>

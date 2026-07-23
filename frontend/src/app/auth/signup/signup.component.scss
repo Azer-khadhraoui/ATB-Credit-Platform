@@ -43,6 +43,27 @@
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
+  // Replays on every navigation: the router destroys and recreates this element,
+  // so a fresh mount always starts the entrance animation from scratch.
+  animation: cardEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+
+  &--leaving {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+    pointer-events: none;
+  }
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .login-card__form {
