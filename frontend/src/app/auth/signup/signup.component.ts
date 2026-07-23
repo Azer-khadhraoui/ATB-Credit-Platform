@@ -18,7 +18,7 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 })
 export class SignupComponent {
   /** How long the exit transition plays before the route actually changes. */
-  private static readonly TRANSITION_MS = 280;
+  private static readonly TRANSITION_MS = 450;
 
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);

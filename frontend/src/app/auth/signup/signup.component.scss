@@ -16,6 +16,9 @@
   box-sizing: border-box;
   overflow: hidden;
   background: #1a1c2e;
+  // Gives the card real depth so the flip reads as a physical rotation
+  // rather than a flat horizontal squash.
+  perspective: 2200px;
 
   &::before {
     content: '';
@@ -43,26 +46,37 @@
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
-  // Replays on every navigation: the router destroys and recreates this element,
-  // so a fresh mount always starts the entrance animation from scratch.
-  animation: cardEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition: opacity 0.28s ease, transform 0.28s ease;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  // Mirrors the login card: it exits to the right, so this one swings in from
+  // the right — the two halves read as a single card being turned over.
+  animation: cardFlipIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 
   &--leaving {
-    opacity: 0;
-    transform: scale(0.97) translateY(8px);
+    animation: cardFlipOut 0.45s cubic-bezier(0.55, 0, 0.85, 0.3) both;
     pointer-events: none;
   }
 }
 
-@keyframes cardEnter {
+@keyframes cardFlipIn {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(12px);
+    transform: rotateY(85deg) scale(0.92);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
+@keyframes cardFlipOut {
+  from {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: rotateY(-85deg) scale(0.92);
   }
 }
 

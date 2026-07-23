@@ -16,7 +16,7 @@ export class LoginComponent {
   private readonly router = inject(Router);
 
   /** How long the exit transition plays before the route actually changes. */
-  private static readonly TRANSITION_MS = 280;
+  private static readonly TRANSITION_MS = 450;
   /** How long the post-login logo animation plays before landing on the dashboard. */
   private static readonly SUCCESS_ANIMATION_MS = 1200;
 
