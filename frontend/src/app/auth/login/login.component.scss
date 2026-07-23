@@ -5,6 +5,14 @@
   --muted: #7a7a85;
 }
 
+// Registering the angle as a typed custom property is what makes it animatable —
+// a plain CSS variable would jump between values instead of sweeping smoothly.
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 .login-page {
   position: relative;
   min-height: 100vh;
@@ -43,21 +51,58 @@
   grid-template-columns: minmax(320px, 38%) 1fr;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(6px);
+  // Layered depth: a tight contact shadow, a broad ambient one, and a faint red
+  // bloom so the card feels lit rather than just dropped on the background.
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.18),
+    0 30px 70px rgba(0, 0, 0, 0.42),
+    0 0 90px rgba(200, 19, 79, 0.18);
+  // Two backgrounds: the frosted panel fills the padding box, the rotating
+  // gradient only shows through the 2px border box — a lit rim around the card.
+  border: 2px solid transparent;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)) padding-box,
+    conic-gradient(
+        from var(--border-angle),
+        rgba(200, 19, 79, 0.85),
+        rgba(255, 255, 255, 0.75),
+        rgba(156, 15, 62, 0.85),
+        rgba(255, 255, 255, 0.4),
+        rgba(200, 19, 79, 0.85)
+      )
+      border-box;
+  backdrop-filter: blur(18px) saturate(1.15);
   transform-style: preserve-3d;
   backface-visibility: hidden;
   // Replays on every navigation: the router destroys and recreates this element,
   // so a fresh mount always starts the entrance animation from scratch. The card
   // swings in from the left, as the mirror image of the signup card's exit.
-  animation: cardFlipIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation:
+    cardFlipIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both,
+    borderSweep 7s linear infinite;
 
   &--leaving {
     // Rotates away edge-on: paired with the signup card flipping in from the
     // opposite side, the two reads as one continuous card being turned over.
     animation: cardFlipOut 0.45s cubic-bezier(0.55, 0, 0.85, 0.3) both;
     pointer-events: none;
+  }
+}
+
+@keyframes borderSweep {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+@keyframes haloBreathe {
+  0%, 100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
   }
 }
 
@@ -89,12 +134,41 @@
   flex-direction: column;
   justify-content: flex-start;
 
+  // Wrapper exists purely to host the halo: a pseudo-element on the <img> itself
+  // would never render, since replaced elements have no content box to fill.
+  .form-logo {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 260px;
+      height: 260px;
+      margin: -130px 0 0 -130px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(200, 19, 79, 0.22) 0%,
+        rgba(200, 19, 79, 0.09) 45%,
+        transparent 70%
+      );
+      animation: haloBreathe 4.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+  }
+
   .form-header__icon {
+    position: relative;
     display: block;
     width: 220px;
     height: 220px;
     object-fit: contain;
-    margin: 0 auto 8px;
+    filter: drop-shadow(0 8px 18px rgba(200, 19, 79, 0.28));
   }
 
   .form-header {
@@ -106,8 +180,12 @@
     margin: 0 0 6px;
     font-size: 28px;
     font-weight: 800;
-    color: var(--atb-red-dark);
     letter-spacing: -0.01em;
+    // Gradient text: painted on the background, then clipped to the glyphs.
+    background: linear-gradient(135deg, var(--atb-red), var(--atb-red-dark) 60%, #6d0a2b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .subtitle {
