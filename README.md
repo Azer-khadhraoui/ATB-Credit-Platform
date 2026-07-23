@@ -1,206 +1,192 @@
 <div align="center">
 
-<img src="frontend/public/images/logoatbicon.webp" alt="Arab Tunisian Bank" width="120" />
+<img src="frontend/public/images/logoatbicon.webp" alt="Arab Tunisian Bank" width="110" />
 
 # ATB Credit Platform
 
-**Plateforme web sécurisée d'aide à la décision pour la gestion des dossiers de crédit, intégrant un moteur de Machine Learning**
+**Credit-file management with explainable AI risk scoring**
 
-Projet de stage — Arab Tunisian Bank × ESPRIT
+Internship project — Arab Tunisian Bank × ESPRIT
 
 [![CI](https://github.com/Azer-khadhraoui/ATB-Credit-Platform/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 [![Security](https://github.com/Azer-khadhraoui/ATB-Credit-Platform/actions/workflows/security.yml/badge.svg)](../../actions/workflows/security.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Azer-khadhraoui_ATB-Credit-Platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Azer-khadhraoui_ATB-Credit-Platform)
+[![Release](https://img.shields.io/github/v/release/Azer-khadhraoui/ATB-Credit-Platform?color=c8134f)](../../releases)
 
 [![Angular](https://img.shields.io/badge/Angular-19-DD0031?logo=angular&logoColor=white)](frontend)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white)](backend)
-[![FastAPI](https://img.shields.io/badge/FastAPI-ML%20Service-009688?logo=fastapi&logoColor=white)](ml-service)
-[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)](#)
-[![Python](https://img.shields.io/badge/scikit--learn-Model-F7931E?logo=scikitlearn&logoColor=white)](ml-service)
+[![FastAPI](https://img.shields.io/badge/FastAPI-scikit--learn-009688?logo=fastapi&logoColor=white)](ml-service)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
-[![Trivy](https://img.shields.io/badge/Trivy-Security%20Scan-1904DA?logo=aqua&logoColor=white)](.github/workflows/security.yml)
-[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=Azer-khadhraoui_ATB-Credit-Platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Azer-khadhraoui_ATB-Credit-Platform)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Manifests-326CE5?logo=kubernetes&logoColor=white)](k8s)
 
 </div>
 
 ---
 
-## Sommaire
+## Overview
 
-- [Aperçu](#aperçu)
-- [Architecture](#architecture)
-- [Stack technique](#stack-technique)
-- [Modules fonctionnels](#modules-fonctionnels)
-- [Démarrage](#démarrage)
-- [Structure du dépôt](#structure-du-dépôt)
-- [Sécurité applicative](#sécurité-applicative)
-- [CI/CD & DevSecOps](#cicd--devsecops)
-- [Roadmap](#roadmap)
+An internal platform for bank agents and administrators to manage clients and credit files, with an ML model that scores each application's risk — and **explains what drove the score**.
 
-## Aperçu
-
-ATB Credit Platform est une application interne destinée aux **agents bancaires** et **administrateurs** pour gérer les clients et les dossiers de crédit d'une banque, avec une analyse de risque assistée par un **modèle de Machine Learning** entraîné sur un jeu de données public (Loan Prediction). L'objectif n'est pas de remplacer la décision humaine, mais de fournir un **score de risque indicatif** pour assister l'agent dans sa décision finale.
+The model assists the decision; it never replaces it. Every prediction is broken down per feature so an agent can defend the outcome to a client.
 
 ## Architecture
-
-Le projet suit une architecture **microservices**, avec une séparation claire entre l'interface, la logique métier et le moteur d'analyse :
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌──────────────┐
 │  Frontend   │ ───▶ │   Backend    │ ───▶ │  ML Service  │
 │  Angular 19 │      │ Spring Boot 4│      │   FastAPI    │
 └─────────────┘      └──────┬───────┘      └──────┬───────┘
-                             │                      │
-                             ▼                      ▼
-                       ┌──────────┐          ┌─────────────┐
-                       │ MongoDB  │          │ scikit-learn│
-                       └──────────┘          │   modèle    │
-                                              └─────────────┘
+                            │                     │
+                            ▼                     ▼
+                      ┌──────────┐        ┌──────────────┐
+                      │ MongoDB  │        │ scikit-learn │
+                      └──────────┘        └──────────────┘
 ```
 
-- **Frontend** : consomme l'API REST du backend, aucune logique métier côté client.
-- **Backend** : porte l'authentification, les règles métier, la persistance, et orchestre l'appel au service ML.
-- **ML Service** : service Python indépendant, ne connaît rien de MongoDB ni de l'authentification — il expose uniquement un modèle de scoring entraîné.
+The ML service knows nothing about MongoDB or authentication — it exposes a scoring model and nothing else. The frontend holds no business logic.
 
-## Stack technique
+## Explainable scoring
 
-| Composant | Technologie | Rôle |
-|---|---|---|
-| Frontend | Angular 19, TypeScript, SCSS | Interface web (signals, standalone components) |
-| Backend | Spring Boot 4.1, Java 21, Spring Security | API REST, logique métier, authentification JWT |
-| Base de données | MongoDB | Utilisateurs, clients, dossiers, résultats IA, audit logs |
-| Service ML | Python, FastAPI, scikit-learn, pandas | Entraînement et exposition du modèle de scoring |
-| Auth | JWT + BCrypt | Authentification stateless, rôles Admin / Agent de crédit |
-| Conteneurisation | Docker, Docker Compose, Nginx | Empaquetage et orchestration des quatre services |
-| DevSecOps | GitHub Actions, Trivy, CodeQL, Gitleaks | Build automatisé et analyse de vulnérabilités |
+The model returns each feature's contribution to the decision, computed as `coefficient × (value − training mean)` in log-odds. Weighting by the distance from an average applicant is what makes the explanation specific to that file rather than a general statement about the model.
 
-## Modules fonctionnels
+The six strongest factors are persisted and rendered as ranked bars — green lowers risk, red raises it:
 
-- **Authentification & sécurité** — connexion JWT, hashage BCrypt, rôles (`ADMIN`, `AGENT_CREDIT`), routes protégées par rôle.
-- **Gestion des utilisateurs** — CRUD complet, photo de profil, gestion du mot de passe, page « Mon profil » en libre-service.
-- **Gestion des clients** — CRUD complet, informations personnelles, coordonnées, situation professionnelle.
-- **Gestion des dossiers de crédit** — création, modification, consultation, recherche, changement de statut.
-- **Module Machine Learning** — analyse à la demande d'un dossier : score de risque, niveau de risque (`LOW`/`MEDIUM`/`HIGH`) et décision indicative (`ACCEPTABLE`/`RISKY`/`REJECTED`), calculés par un modèle de régression logistique entraîné sur le dataset public *Loan Prediction*.
-- **Audit log** — journalisation des connexions, créations, modifications, suppressions et analyses IA ; consultation réservée aux administrateurs.
-- **Tableau de bord** — statistiques en temps réel : volumétrie, répartition par statut, répartition des risques, répartition par type de crédit, activité récente.
+| Feature | Impact | Direction |
+|---|---:|---|
+| Credit history | −2.40 | ▲ raises risk |
+| Loan term | +0.77 | ▼ lowers risk |
+| Education | −0.35 | ▲ raises risk |
 
-## Démarrage
+## Stack
 
-### Avec Docker (recommandé)
+| Layer | Technology |
+|---|---|
+| Frontend | Angular 19 (standalone components, signals), TypeScript, SCSS |
+| Backend | Spring Boot 4.1, Java 21, Spring Security, JWT + BCrypt |
+| Database | MongoDB 7 |
+| ML service | Python 3.11, FastAPI, scikit-learn, pandas |
+| Packaging | Docker (multi-stage, non-root), Nginx |
+| Orchestration | Docker Compose, Kubernetes |
+| CI/CD | GitHub Actions, SonarCloud, Trivy, CodeQL, Gitleaks, OWASP ZAP |
 
-Une seule commande lance l'ensemble de la plateforme — aucun outil à installer hormis Docker.
+## Features
+
+| Module | Capability |
+|---|---|
+| **Auth** | JWT (stateless), BCrypt, roles `ADMIN` / `AGENT_CREDIT`, role checks enforced server-side |
+| **Users** | CRUD, profile photo, password change, self-service profile page |
+| **Clients** | CRUD, personal / contact / employment data |
+| **Credit files** | CRUD, status workflow, search |
+| **AI analysis** | Risk score, level (`LOW`/`MEDIUM`/`HIGH`), decision (`ACCEPTABLE`/`RISKY`/`REJECTED`) + per-feature explanation |
+| **Audit log** | Every sensitive action traced with its author — admin-only access |
+| **Dashboard** | Volumes, status and risk distribution, recent activity |
+
+## Quick start
+
+### Docker Compose
 
 ```bash
-cp .env.example .env      # ajuster le secret JWT si besoin
+cp .env.example .env      # set JWT_SECRET
 docker compose up --build -d
 ```
 
 | Service | URL |
 |---|---|
-| Application web | http://localhost:4200 |
-| API backend | http://localhost:8081 |
-| Service ML | http://localhost:8000/docs |
+| Web app | http://localhost:4200 |
+| API | http://localhost:8081 |
+| ML service | http://localhost:8000/docs |
 
-Commandes utiles :
+Startup is ordered by healthchecks — the backend waits until MongoDB and the ML service actually respond, not merely until they start.
 
-```bash
-docker compose ps        # état des conteneurs
-docker compose logs -f    # logs en continu
-docker compose down       # tout arrêter
-```
-
-Le démarrage est ordonné par des *healthchecks* : le backend n'attend pas seulement que MongoDB et le service ML soient lancés, mais qu'ils répondent réellement. Les données MongoDB et les photos de profil sont conservées dans des volumes nommés.
-
-### Sans Docker (développement)
-
-Utile pour déboguer un service isolément. MongoDB doit tourner localement sur le port `27017`.
+### Kubernetes
 
 ```bash
-# Backend — http://localhost:8081
-cd backend && ./mvnw spring-boot:run
+kubectl apply -f k8s/00-namespace.yaml -f k8s/01-config.yaml
 
-# Service ML — http://localhost:8000
-cd ml-service
-pip install -r requirements-docker.txt
-uvicorn app.main:app --port 8000
+kubectl create secret generic atb-jwt -n atb \
+  --from-literal=JWT_SECRET="$(openssl rand -base64 48)"
 
-# Frontend — http://localhost:4200
-cd frontend && npm install && npm start
+kubectl apply -f k8s/
 ```
 
-Le modèle entraîné (`ml-service/models/model.pkl`) est chargé au démarrage du service ML — voir `notebooks/01_train_model.ipynb` pour reproduire l'entraînement.
+MongoDB runs as a StatefulSet with its own PVC; the ML service stays internal (ClusterIP); backend and frontend are exposed via LoadBalancer. See [`k8s/README.md`](k8s/README.md).
 
-## Structure du dépôt
+### Container images
 
-```
-ATB-Credit-Platform/
-├── docker-compose.yml   Orchestration des quatre services
-├── .env.example         Modèle de configuration (secrets hors dépôt)
-├── .github/workflows/   Pipelines CI et DevSecOps
-├── frontend/            Application Angular + Dockerfile + config Nginx
-├── backend/             API Spring Boot + Dockerfile
-├── ml-service/          Service FastAPI + Dockerfile
-│   ├── app/              Code de l'API (endpoints, chargement du modèle)
-│   ├── data/raw/         Dataset d'entraînement (Loan Prediction)
-│   ├── models/           Modèle entraîné et artefacts (.pkl)
-│   └── notebooks/        Notebook de préparation des données et d'entraînement
-└── docs/                Documentation et maquettes de conception
+```bash
+docker pull ghcr.io/azer-khadhraoui/atb-backend:v1.0.0
 ```
 
-## Sécurité applicative
+Published to GHCR on every `v*` tag.
 
-- Mots de passe hashés avec **BCrypt**, jamais stockés en clair.
-- Authentification **stateless** via **JWT**, vérifié à chaque requête protégée.
-- Autorisations par rôle appliquées **côté backend** (pas seulement dans l'interface) : par exemple, `/api/audit-logs` renvoie `403` pour un compte non-administrateur, indépendamment de ce que montre l'interface.
-- Chaque action sensible (connexion, création, modification, suppression, analyse IA) est tracée dans le journal d'audit avec l'identité de l'auteur.
-- Secrets (secret JWT, base de données) injectés par variables d'environnement, jamais versionnés — seul `.env.example` figure dans le dépôt.
+## Testing
 
-## CI/CD & DevSecOps
+| Suite | Tests | Tooling |
+|---|---:|---|
+| Backend | 36 | JUnit 5, Mockito, JaCoCo |
+| Frontend | 49 | Jasmine, Karma, lcov |
+| ML service | 7 | pytest, pytest-cov |
 
-Deux workflows GitHub Actions s'exécutent à chaque `push` et `pull request` sur `main`.
+Coverage from all three feeds the SonarCloud quality gate, which blocks on coverage and duplication of new code.
 
-**`ci.yml` — build, tests & qualité**
-Compile et teste chaque service (Spring Boot avec un conteneur MongoDB, Angular en configuration production, FastAPI avec vérification du chargement du modèle), lance l'analyse de qualité **SonarCloud**, puis construit les trois images Docker.
+Backend tests pin the domain-to-model feature mapping — including the TND → thousands loan-amount scale that once skewed every prediction — so the contract with the model cannot drift silently.
 
-**`security.yml` — analyse de sécurité**
+## Security
 
-| Outil | Type | Portée |
+- Passwords hashed with **BCrypt**; JWT signing key supplied at runtime via `JWT_SECRET` and **never committed** — the app refuses to start if it is missing or under 32 characters.
+- Authorization enforced **server-side**: `/api/audit-logs` returns `403` for non-admins regardless of what the UI shows.
+- Containers run as **non-root** from minimal base images, built in multi-stage builds so compilers never ship to production.
+
+### Automated analysis
+
+| Tool | Type | Scope |
 |---|---|---|
-| **Gitleaks** | Secrets | Détection de secrets sur l'intégralité de l'historique Git |
-| **CodeQL** | SAST | Analyse statique du code — Java, TypeScript, Python |
-| **Trivy** | SCA | Vulnérabilités des dépendances du projet |
-| **Trivy** | Image | Vulnérabilités des trois images Docker |
-| **OWASP ZAP** | DAST | Scan dynamique de l'application **en cours d'exécution** |
-| **SonarCloud** | Qualité | Duplication, complexité, maintenabilité |
+| Gitleaks | Secrets | Full git history |
+| CodeQL | SAST | Java, TypeScript, Python |
+| Trivy | SCA | Project dependencies |
+| Trivy | Image | The three Docker images |
+| OWASP ZAP | DAST | The **running** application |
+| SonarCloud | Quality | Coverage, duplication, maintainability |
 
-L'ensemble couvre les analyses **statiques** (code et images au repos) et **dynamique** (application réellement démarrée via Docker Compose, pour détecter ce que l'analyse statique ne voit pas : en-têtes mal configurés, endpoints exposés, XSS).
+SAST inspects code, SCA inspects dependencies, DAST attacks the live app — none of the three covers the other two. Results land in the repository's *Security* tab as SARIF, with a weekly re-scan since new CVEs get published against unchanged code.
 
-**Dependabot** surveille par ailleurs les mises à jour des dépendances Maven, npm, pip, des images de base Docker et des actions GitHub elles-mêmes. Les mises à jour sont regroupées par écosystème pour éviter une avalanche de pull requests.
+Scans **report without blocking**: a transitive CVE with no available fix should not stop a release. Dependabot keeps Maven, npm, pip, base images and the Actions themselves current, grouped per ecosystem.
 
-Les résultats sont publiés au format SARIF dans l'onglet *Security* du dépôt. Une analyse hebdomadaire est également planifiée, de nouvelles vulnérabilités pouvant être publiées contre du code inchangé.
+## Repository layout
 
-Les scans **rapportent sans bloquer** le pipeline : une CVE transitive sans correctif disponible ne doit pas empêcher la livraison.
-
-**Durcissement des conteneurs**
-- Processus exécutés sous un **utilisateur non-root** dans chaque image
-- **Images de base minimales** (Alpine, slim) pour réduire la surface d'attaque
-- **Builds multi-étapes** : les outils de compilation (Maven, Node) n'apparaissent pas dans les images finales
+```
+├── frontend/            Angular app + Dockerfile + Nginx config
+├── backend/             Spring Boot API + Dockerfile
+├── ml-service/          FastAPI service + Dockerfile
+│   ├── app/               Endpoints, model loading, explanation
+│   ├── models/            Trained model and artifacts (.pkl)
+│   └── notebooks/         Data preparation and training
+├── k8s/                 Kubernetes manifests
+├── .github/workflows/    CI and DevSecOps pipelines
+├── docker-compose.yml
+└── .env.example         Configuration template (secrets stay out of git)
+```
 
 ## Roadmap
 
-- [x] Authentification JWT & gestion des rôles
-- [x] Gestion des utilisateurs, clients, dossiers de crédit
-- [x] Module Machine Learning (scoring de risque)
-- [x] Journal d'audit
-- [x] Tableau de bord statistique
-- [x] Conteneurisation Docker & orchestration Compose
-- [x] Analyse de vulnérabilités — SAST, SCA, images, secrets (CodeQL, Trivy, Gitleaks)
-- [x] Analyse dynamique (OWASP ZAP) & qualité de code (SonarCloud)
-- [x] Veille automatisée des dépendances (Dependabot)
-- [x] Pipeline CI/CD (GitHub Actions)
-- [ ] Déploiement Kubernetes
+- [x] JWT authentication & role management
+- [x] Users, clients and credit-file management
+- [x] ML risk scoring
+- [x] Per-decision explainability
+- [x] Audit log & dashboard
+- [x] Docker packaging & Compose orchestration
+- [x] CI/CD pipeline (GitHub Actions)
+- [x] DevSecOps — SAST, SCA, DAST, secret scanning, quality gate
+- [x] Test suites across all three services
+- [x] Kubernetes deployment
 
 ---
 
 <div align="center">
-<sub>Projet réalisé dans le cadre d'un stage à l'Arab Tunisian Bank — ESPRIT, Cloud Computing & Cybersécurité</sub>
+
+<img src="frontend/public/images/logoatbicon.webp" alt="ATB" width="64" />
+
+<sub>Arab Tunisian Bank — ESPRIT, Cloud Computing &amp; Cybersecurity</sub>
+
 </div>
