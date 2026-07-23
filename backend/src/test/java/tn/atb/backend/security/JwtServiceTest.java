@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,10 +46,16 @@ class JwtServiceTest {
     @Test
     void tamperedTokenIsRejected() {
         String token = jwtService.generateToken("agent01", Map.of());
+        String[] parts = token.split("\\.");
 
-        // Flipping the last character breaks the signature.
-        String tampered = token.substring(0, token.length() - 1)
-                + (token.endsWith("A") ? "B" : "A");
+        // Swap in a payload claiming a different subject, keeping the original signature.
+        // Tampering the payload (rather than the signature's last character) is what makes
+        // this deterministic: an HS256 signature is 32 bytes but base64url-encodes to 43
+        // characters, so the final character carries 2 unused bits — flipping it can decode
+        // to the very same bytes and leave the token perfectly valid.
+        String forgedPayload = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString("{\"sub\":\"intruder\"}".getBytes(StandardCharsets.UTF_8));
+        String tampered = parts[0] + "." + forgedPayload + "." + parts[2];
 
         assertThat(jwtService.isValid(tampered)).isFalse();
     }
