@@ -4,7 +4,7 @@
 
 # ATB Credit Platform
 
-**Credit-file management with explainable AI risk scoring**
+**Credit-file management with explainable AI risk scoring — built on a DevSecOps pipeline**
 
 Internship project — Arab Tunisian Bank × ESPRIT
 
@@ -19,6 +19,7 @@ Internship project — Arab Tunisian Bank × ESPRIT
 [![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Manifests-326CE5?logo=kubernetes&logoColor=white)](k8s)
+[![DevSecOps](https://img.shields.io/badge/DevSecOps-SAST%20%7C%20SCA%20%7C%20DAST-c8134f)](.github/workflows/security.yml)
 
 </div>
 
@@ -132,7 +133,11 @@ Coverage from all three feeds the SonarCloud quality gate, which blocks on cover
 
 Backend tests pin the domain-to-model feature mapping — including the TND → thousands loan-amount scale that once skewed every prediction — so the contract with the model cannot drift silently.
 
-## Security
+## Security & DevSecOps
+
+Security is not a release-time audit here: it runs on the same trigger as the tests, on every push and pull request. That is what makes the pipeline **DevSecOps** rather than CI with a security review bolted on afterwards.
+
+### Application hardening
 
 - Passwords hashed with **BCrypt**; JWT signing key supplied at runtime via `JWT_SECRET` and **never committed** — the app refuses to start if it is missing or under 32 characters.
 - Authorization enforced **server-side**: `/api/audit-logs` returns `403` for non-admins regardless of what the UI shows.
