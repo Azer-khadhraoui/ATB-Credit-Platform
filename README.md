@@ -1,12 +1,10 @@
 <div align="center">
 
-<img src="frontend/public/images/logoatbicon.webp" alt="Arab Tunisian Bank" width="110" />
+<img src="frontend/public/images/logoatbicon.webp" alt="Arab Tunisian Bank" width="90" />
 
-# ATB Credit Platform
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:c8134f,100:9c0f3e&height=170&section=header&text=ATB%20Credit%20Platform&fontSize=42&fontColor=ffffff&animation=fadeIn&fontAlignY=42&desc=Explainable%20AI%20credit%20scoring%20%C2%B7%20DevSecOps%20%C2%B7%20Kubernetes&descAlignY=64&descSize=15" width="100%" />
 
-**Credit-file management with explainable AI risk scoring — built on a DevSecOps pipeline**
-
-Internship project — Arab Tunisian Bank × ESPRIT
+_Internship project — Arab Tunisian Bank × ESPRIT_
 
 [![CI](https://github.com/Azer-khadhraoui/ATB-Credit-Platform/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 [![Security](https://github.com/Azer-khadhraoui/ATB-Credit-Platform/actions/workflows/security.yml/badge.svg)](../../actions/workflows/security.yml)
@@ -33,16 +31,20 @@ The model assists the decision; it never replaces it. Every prediction is broken
 
 ## Architecture
 
-```
-┌─────────────┐      ┌──────────────┐      ┌──────────────┐
-│  Frontend   │ ───▶ │   Backend    │ ───▶ │  ML Service  │
-│  Angular 19 │      │ Spring Boot 4│      │   FastAPI    │
-└─────────────┘      └──────┬───────┘      └──────┬───────┘
-                            │                     │
-                            ▼                     ▼
-                      ┌──────────┐        ┌──────────────┐
-                      │ MongoDB  │        │ scikit-learn │
-                      └──────────┘        └──────────────┘
+```mermaid
+flowchart LR
+    U([👤 Agent / Admin]) -->|HTTPS| F["🅰️ Frontend<br/>Angular 19"]
+    F -->|REST · JWT| B["🌱 Backend<br/>Spring Boot 4"]
+    B -->|read / write| M[("🍃 MongoDB 7")]
+    B -->|POST /predict| ML["⚡ ML Service<br/>FastAPI"]
+    ML --> SK["🤖 scikit-learn<br/>model + explainer"]
+
+    classDef front fill:#DD0031,stroke:#fff,color:#fff;
+    classDef back fill:#6DB33F,stroke:#fff,color:#fff;
+    classDef ml fill:#009688,stroke:#fff,color:#fff;
+    classDef db fill:#47A248,stroke:#fff,color:#fff;
+    classDef model fill:#F7931E,stroke:#fff,color:#fff;
+    class F front; class B back; class ML ml; class M db; class SK model;
 ```
 
 The ML service knows nothing about MongoDB or authentication — it exposes a scoring model and nothing else. The frontend holds no business logic.
@@ -58,6 +60,28 @@ The six strongest factors are persisted and rendered as ranked bars — green lo
 | Credit history | −2.40 | ▲ raises risk |
 | Loan term | +0.77 | ▼ lowers risk |
 | Education | −0.35 | ▲ raises risk |
+
+<details>
+<summary><b>How an analysis flows through the system</b></summary>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Agent
+    participant B as Backend
+    participant DB as MongoDB
+    participant ML as ML Service
+
+    Agent->>B: Analyze credit file
+    B->>DB: Load client + file
+    B->>ML: POST /predict (features)
+    ML->>ML: score + per-feature contributions
+    ML-->>B: risk score, level, decision, factors
+    B->>DB: Persist result + audit log
+    B-->>Agent: Score, level, decision & explanation
+```
+
+</details>
 
 ## Stack
 
@@ -186,12 +210,12 @@ Scans **report without blocking**: a transitive CVE with no available fix should
 - [x] Test suites across all three services
 - [x] Kubernetes deployment
 
----
-
 <div align="center">
 
-<img src="frontend/public/images/logoatbicon.webp" alt="ATB" width="64" />
+<img src="frontend/public/images/logoatbicon.webp" alt="ATB" width="60" />
 
 <sub>Arab Tunisian Bank — ESPRIT, Cloud Computing &amp; Cybersecurity</sub>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:9c0f3e,100:c8134f&height=110&section=footer" width="100%" />
 
 </div>
