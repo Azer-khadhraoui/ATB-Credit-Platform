@@ -29,6 +29,12 @@ An internal platform for bank agents and administrators to manage clients and cr
 
 The model assists the decision; it never replaces it. Every prediction is broken down per feature so an agent can defend the outcome to a client.
 
+## Demo
+
+https://github.com/user-attachments/assets/21e715c9-96fd-40f8-806f-8bbb971c5fb7
+
+Creating a client, opening a credit file, running the AI analysis, and reading the per-feature explanation.
+
 ## Architecture
 
 ```mermaid
