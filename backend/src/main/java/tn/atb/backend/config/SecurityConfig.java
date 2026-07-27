@@ -39,6 +39,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/health", "/api/auth/**", "/uploads/**").permitAll()
+                        // Prometheus scrapes without a JWT. Only health and the metrics endpoint are
+                        // exposed (see application.properties), and the Service stays ClusterIP —
+                        // so this is reachable from inside the cluster only.
+                        .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers("/api/audit-logs/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
