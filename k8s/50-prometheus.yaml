@@ -1,0 +1,110 @@
+# Prometheus pulls metrics rather than receiving them: it periodically fetches a plain-text
+# page from each target. This ConfigMap tells it what to fetch and how often.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: atb-credit-platform
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+
+    scrape_configs:
+      # Prometheus watching itself — the usual first sanity check.
+      - job_name: prometheus
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # The backend reaches Prometheus through the in-cluster DNS name of its Service,
+      # exactly like the backend reaches mongo:27017.
+      - job_name: backend
+        metrics_path: /actuator/prometheus
+        static_configs:
+          - targets: ['backend:8081']
+---
+# ClusterIP: Prometheus is an internal tool. Nothing outside the cluster needs to reach it —
+# Grafana queries it from inside, and we port-forward when we want to look at it ourselves.
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: atb
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: atb-credit-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus
+        app.kubernetes.io/part-of: atb-credit-platform
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v3.1.0
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            # Metrics are only useful here as a live view; a short retention keeps the
+            # footprint small on a laptop-sized cluster.
+            - --storage.tsdb.retention.time=6h
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            # The ConfigMap is mounted as a file — this is how configuration reaches a container
+            # without being baked into its image.
+            - name: config
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        # emptyDir, not a PVC: this data is a rolling 6h window, not something worth persisting
+        # across pod restarts.
+        - name: data
+          emptyDir: {}
