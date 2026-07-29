@@ -99,6 +99,8 @@ sequenceDiagram
 | ML service | Python 3.11, FastAPI, scikit-learn, pandas |
 | Packaging | Docker (multi-stage, non-root), Nginx |
 | Orchestration | Docker Compose, Kubernetes |
+| Infrastructure as Code | Terraform (Kubernetes provider) |
+| Observability | Prometheus, Grafana, Spring Boot Actuator + Micrometer |
 | CI/CD | GitHub Actions, SonarCloud, Trivy, CodeQL, Gitleaks, OWASP ZAP |
 
 ## Features
@@ -112,6 +114,7 @@ sequenceDiagram
 | **AI analysis** | Risk score, level (`LOW`/`MEDIUM`/`HIGH`), decision (`ACCEPTABLE`/`RISKY`/`REJECTED`) + per-feature explanation |
 | **Audit log** | Every sensitive action traced with its author — admin-only access |
 | **Dashboard** | Volumes, status and risk distribution, recent activity |
+| **Monitoring** | Backend metrics scraped every 15s; Grafana panels for traffic, latency, JVM memory, CPU and threads |
 
 ## Quick start
 
@@ -142,6 +145,30 @@ kubectl apply -f k8s/
 ```
 
 MongoDB runs as a StatefulSet with its own PVC; the ML service stays internal (ClusterIP); backend and frontend are exposed via LoadBalancer. See [`k8s/README.md`](k8s/README.md).
+
+### Monitoring
+
+Prometheus and Grafana ship with the manifests above:
+
+```bash
+kubectl create secret generic grafana-admin -n atb \
+  --from-literal=password="$(openssl rand -base64 18)"
+```
+
+Grafana then answers on http://localhost:3000 with the Prometheus datasource and the backend dashboard already registered — both are provisioned from ConfigMaps, so a setting is never lost to a pod restart the way a UI change would be.
+
+### Terraform
+
+An alternative to applying the manifests by hand, in its own namespace so the two never collide:
+
+```bash
+cd terraform
+terraform init
+terraform plan     # shows the exact diff before anything changes
+terraform apply
+```
+
+`terraform plan` is the reason to reach for it: `kubectl apply` reports what it did, Terraform reports what it *will* do (`~ replicas = "1" -> "2"`). It tracks what it created in a state file, which is why it manages `atb-tf` rather than the namespace kubectl already owns.
 
 ### Container images
 
@@ -197,7 +224,8 @@ Scans **report without blocking**: a transitive CVE with no available fix should
 │   ├── app/               Endpoints, model loading, explanation
 │   ├── models/            Trained model and artifacts (.pkl)
 │   └── notebooks/         Data preparation and training
-├── k8s/                 Kubernetes manifests
+├── k8s/                 Kubernetes manifests, incl. Prometheus and Grafana
+├── terraform/           Same workload as HCL, in its own namespace
 ├── .github/workflows/    CI and DevSecOps pipelines
 ├── docker-compose.yml
 └── .env.example         Configuration template (secrets stay out of git)
@@ -215,6 +243,8 @@ Scans **report without blocking**: a transitive CVE with no available fix should
 - [x] DevSecOps — SAST, SCA, DAST, secret scanning, quality gate
 - [x] Test suites across all three services
 - [x] Kubernetes deployment
+- [x] Observability — Prometheus metrics, provisioned Grafana dashboard
+- [x] Infrastructure as Code — Terraform (Kubernetes provider)
 
 <div align="center">
 
