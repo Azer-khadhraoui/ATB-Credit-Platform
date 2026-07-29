@@ -1,0 +1,13 @@
+# The state file records everything Terraform created — including values that were secret at
+# apply time. It is also specific to one machine's cluster, so it never belongs in git.
+*.tfstate
+*.tfstate.*
+
+# Downloaded provider binaries — re-fetched by `terraform init`.
+# (.terraform.lock.hcl IS committed on purpose: it pins provider versions so every
+#  init resolves to the same ones, the same role package-lock.json plays for npm.)
+.terraform/
+
+# Variable files hold environment-specific values, secrets included.
+*.tfvars
+!example.tfvars
