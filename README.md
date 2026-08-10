@@ -35,6 +35,8 @@ https://github.com/user-attachments/assets/21e715c9-96fd-40f8-806f-8bbb971c5fb7
 
 Creating a client, opening a credit file, running the AI analysis, and reading the per-feature explanation.
 
+📄 **[Internship report (PDF, French)](docs/RapportdeStage.pdf)** — design decisions, the explainability method, and the DevSecOps pipeline in detail.
+
 ## Architecture
 
 ```mermaid
