@@ -19,12 +19,12 @@ jobs:
     name: Secret detection (Gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Gitleaks scans the whole history, not just the tip.
 
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -43,16 +43,16 @@ jobs:
           - language: python
             build-mode: none
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: '/language:${{ matrix.language }}'
 
@@ -61,7 +61,7 @@ jobs:
     name: Dependency vulnerabilities (Trivy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Scan project dependencies
         uses: aquasecurity/trivy-action@v0.36.0
@@ -75,7 +75,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload results to the Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-fs.sarif
           category: trivy-filesystem
@@ -89,7 +89,7 @@ jobs:
       matrix:
         service: [backend, frontend, ml-service]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build image
         run: docker build -t atb-${{ matrix.service }}:scan ./${{ matrix.service }}
@@ -104,7 +104,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload results to the Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-${{ matrix.service }}.sarif
           category: trivy-image-${{ matrix.service }}
@@ -118,7 +118,7 @@ jobs:
     name: Dynamic scan (OWASP ZAP)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Start the stack
         run: |
